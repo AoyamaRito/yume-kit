@@ -1,0 +1,15 @@
+{
+  "name": "webqa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ヘッドレスブラウザ + ピクセル解析 + パリティ検証の一括QA",
+  "scripts": {
+    "parity": "node webqa.mjs parity",
+    "qa": "node webqa.mjs qa"
+  },
+  "dependencies": {
+    "playwright-core": "^1.62.0",
+    "pngjs": "^7.0.0"
+  }
+}

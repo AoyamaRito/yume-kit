@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ja" data-accent="vermilion">
+<head>
+  <meta charset="UTF-8">
+  <!-- @why: design/PHILOSOPHY.md の単機能・直列思想・線の省略・左右HUD・MarchingDots・エラーShake・DONE静寂Dimを完全具現化したプロ品質飾り文字工房UI -->
+  <!-- @tags: SPEC, KAZARI_STUDIO, DESIGN_SYSTEM, LINEAR_FLOW, DIM_DONE, HUD, RETINA_EXPORT -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>飾り文字工房 (Kazari Typography Studio)</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- ─────────────────────────────────────────────────────────
+       1. TOP NAVIGATION
+       ───────────────────────────────────────────────────────── -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="../hub.html" class="nav-brand" title="デザインシステム ハブへ">
+        <span class="nav-brand-seal"></span>
+        <span>飾り文字工房</span>
+      </a>
+
+      <!-- 伝統色アクセントスイッチャー (朱 / 藍 / 金) -->
+      <div class="accent-switcher">
+        <span>伝統色:</span>
+        <button type="button" class="accent-btn vermilion" data-set-accent="vermilion" title="朱色 (Vermilion)" aria-label="朱色"></button>
+        <button type="button" class="accent-btn indigo" data-set-accent="indigo" title="藍色 (Indigo)" aria-label="藍色"></button>
+        <button type="button" class="accent-btn gold" data-set-accent="gold" title="金/真鍮 (Gold)" aria-label="金色"></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="margin-top: var(--sp-21); flex: 1;">
+
+    <!-- ─────────────────────────────────────────────────────────
+         2. SHORTCUT HUD BAR (左右キーボード案内)
+         ───────────────────────────────────────────────────────── -->
+    <div class="hud-bar">
+      <div class="hud-side">
+        <span><span class="hud-key">Esc</span> 戻る</span>
+        <span><span class="hud-key">Space</span> スキップ</span>
+        <span><span class="hud-key">⌘+↵</span> 次へ / 完了</span>
+      </div>
+      <div class="hud-side">
+        <span><span class="hud-key">⌘+S</span> PNG保存</span>
+        <span><span class="hud-key">⌘+E</span> SVG出力</span>
+        <span><span class="hud-key">⌘+C</span> 画像コピー</span>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────
+         3. LINEAR APP CONTAINER (STEP PIPELINE)
+         ───────────────────────────────────────────────────────── -->
+    <div class="app-container" id="appContainer">
+
+      <!-- Step Header -->
+      <div class="step-header">
+        <div class="step-badges">
+          <div class="step-badge active" id="badgeStep1">
+            <span class="step-dot"></span>
+            <span>Step 1: 入れる</span>
+          </div>
+          <span style="color: var(--border-subtle)">/</span>
+          <div class="step-badge" id="badgeStep2">
+            <span class="step-dot"></span>
+            <span>Step 2: 選ぶ・整える</span>
+          </div>
+          <span style="color: var(--border-subtle)">/</span>
+          <div class="step-badge" id="badgeStep3">
+            <span class="step-dot"></span>
+            <span>Step 3: 受け取る (Done)</span>
+          </div>
+        </div>
+        <div style="font-family: var(--font-mono); color: var(--text-muted); font-size: 11px;">
+          単機能・直列 3ステップ完走
+        </div>
+      </div>
+
+      <!-- Step Body -->
+      <div class="step-body">
+
+        <!-- ───────────────────────────────────────────────────
+             STEP 1: テキストを入れる (Input Stage)
+             ─────────────────────────────────────────────────── -->
+        <div class="step-pane active" id="paneStep1">
+          
+          <!-- Marching Dotted Frame 付きプレビュー舞台 -->
+          <div class="marching-frame" id="frameStep1">
+            <svg class="frame-border"><rect width="100%" height="100%" /></svg>
+            <div class="stage-preview" id="stageStep1">
+              <div class="stage-controls">
+                <button type="button" class="stage-btn" id="btnToggleDark1">🌗 背景明暗</button>
+                <button type="button" class="stage-btn" id="btnToggleChecker1">🏁 透過グリッド</button>
+              </div>
+              <canvas class="preview-canvas" id="canvasStep1"></canvas>
+            </div>
+          </div>
+
+          <!-- 入力フィールド群 -->
+          <div class="input-grid">
+            <div>
+              <!-- メインタイトル入力 -->
+              <div class="field-group">
+                <label class="field-label" for="inputMainTitle">
+                  <span>メイン文字 / タイトル <span style="color: var(--accent)">*</span></span>
+                  <span style="font-size: 10px; color: var(--text-muted);">漢字・ひらがな・英数字</span>
+                </label>
+                <input type="text" id="inputMainTitle" class="field-input main-title" value="天衣無縫" placeholder="例: 絶体絶命、革命前夜、NEON RUSH" autocomplete="off">
+                <span class="error-hint">⚠️ タイトルを入力してください</span>
+              </div>
+
+              <!-- ルビ & サブタイトル -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-13);">
+                <div class="field-group">
+                  <label class="field-label" for="inputRuby">ルビ（ふりがな）</label>
+                  <input type="text" id="inputRuby" class="field-input" value="てんいむほう" placeholder="例: てんいむほう">
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="inputSubText">サブ欧文・キャッチ</label>
+                  <input type="text" id="inputSubText" class="field-input" value="PURE ARTISTRY & CRAFT" placeholder="例: CHAPTER 01 / EPISODE">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <!-- 組方向切替 & プレフィックス -->
+              <div class="field-group">
+                <label class="field-label">組方向（縦書き / 横書き）</label>
+                <div class="direction-toggle" id="directionToggle">
+                  <button type="button" class="toggle-option active" data-direction="horizontal">横書き</button>
+                  <button type="button" class="toggle-option" data-direction="vertical">縦書き</button>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="inputBadge">プレフィックス / 章番号</label>
+                <input type="text" id="inputBadge" class="field-input" value="第壱幕" placeholder="例: 第壱幕、BEST、01">
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="inputSealText">落款（朱印）文字</label>
+                <input type="text" id="inputSealText" class="field-input" value="極" maxlength="2" placeholder="例: 極、印、謹製">
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ───────────────────────────────────────────────────
+             STEP 2: プリセットを選ぶ・整える (Style & Tweak)
+             ─────────────────────────────────────────────────── -->
+        <div class="step-pane" id="paneStep2">
+
+          <!-- Marching Dotted Frame 付きプレビュー舞台 -->
+          <div class="marching-frame is-processing" id="frameStep2">
+            <svg class="frame-border"><rect width="100%" height="100%" /></svg>
+            <div class="stage-preview" id="stageStep2">
+              <div class="stage-controls">
+                <button type="button" class="stage-btn" id="btnToggleDark2">🌗 背景明暗</button>
+                <button type="button" class="stage-btn" id="btnToggleChecker2">🏁 透過グリッド</button>
+              </div>
+              <canvas class="preview-canvas" id="canvasStep2"></canvas>
+            </div>
+          </div>
+
+          <!-- 8大プロ品質プリセット選択 -->
+          <div class="field-label" style="margin-bottom: var(--sp-8);">
+            <span>8大プロ品質プリセット (Sane Defaults)</span>
+            <span style="font-size: 10px; color: var(--text-muted);">クリックで一撃適用</span>
+          </div>
+          <div class="presets-grid" id="presetsGrid">
+            <!-- JSで動的生成 -->
+          </div>
+
+          <!-- 枝葉UI: 折りたたみ詳細微調整 -->
+          <details class="details-drawer" id="detailsDrawer">
+            <summary class="details-summary">
+              <span>⚙️ 詳細微調整（フォント・3D・光彩・オーナメント）</span>
+              <span style="font-size: 10px; color: var(--text-muted)">開いて細かく調整</span>
+            </summary>
+            <div class="details-content">
+              
+              <div class="field-group">
+                <label class="field-label">フォントサイズ</label>
+                <div class="slider-wrap">
+                  <input type="range" id="sliderFontSize" min="32" max="144" value="72">
+                  <span class="slider-val" id="valFontSize">72px</span>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">字間 (Letter Spacing)</label>
+                <div class="slider-wrap">
+                  <input type="range" id="sliderLetterSpacing" min="-5" max="30" value="4">
+                  <span class="slider-val" id="valLetterSpacing">4px</span>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">3D立体押し出し深さ</label>
+                <div class="slider-wrap">
+                  <input type="range" id="slider3dDepth" min="0" max="16" value="2">
+                  <span class="slider-val" id="val3dDepth">2px</span>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">フチ取り幅 (Stroke)</label>
+                <div class="slider-wrap">
+                  <input type="range" id="sliderStrokeWidth" min="0" max="16" value="4">
+                  <span class="slider-val" id="valStrokeWidth">4px</span>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">オーナメント表示</label>
+                <div style="display: flex; gap: var(--sp-8); flex-wrap: wrap; margin-top: 4px;">
+                  <label class="checkbox-label"><input type="checkbox" id="chkSeal" checked> 朱印落款</label>
+                  <label class="checkbox-label"><input type="checkbox" id="chkSpine" checked> 急所の背骨線</label>
+                  <label class="checkbox-label"><input type="checkbox" id="chkCrown"> 王冠</label>
+                  <label class="checkbox-label"><input type="checkbox" id="chkGlow"> 発光グロー</label>
+                  <label class="checkbox-label"><input type="checkbox" id="chkParticles"> 星屑</label>
+                </div>
+              </div>
+
+            </div>
+          </details>
+
+        </div>
+
+        <!-- ───────────────────────────────────────────────────
+             STEP 3: 成果物を受け取る (Done & Dim Focus)
+             ─────────────────────────────────────────────────── -->
+        <div class="step-pane" id="paneStep3">
+          
+          <div class="done-container">
+            <div class="done-card">
+              <div class="done-seal" id="doneSeal">極</div>
+              <h2 class="done-title">飾り文字 生成完了</h2>
+              <p class="done-desc">プロ品質の飾り文字が仕上がりました。用途に合わせて受け取ってください。</p>
+
+              <!-- 成果物 Canvas プレビュー -->
+              <div style="margin-bottom: var(--sp-21); display: flex; justify-content: center;">
+                <canvas class="preview-canvas" id="canvasStep3" style="max-height: 200px;"></canvas>
+              </div>
+
+              <!-- エクスポートアクション群 -->
+              <div class="export-actions">
+                <button type="button" class="export-card-btn" id="btnExportPng">
+                  <strong>💾 透過PNG (4x Retina)</strong>
+                  <span>最高画質・印刷/動画/同人誌用</span>
+                </button>
+                <button type="button" class="export-card-btn" id="btnExportSvg">
+                  <strong>📐 ベクター SVG</strong>
+                  <span>拡大無劣化・Web/イラレ用</span>
+                </button>
+                <button type="button" class="export-card-btn" id="btnCopyImage">
+                  <strong>📋 画像をコピー</strong>
+                  <span>クリップボードへ直接格納</span>
+                </button>
+                <button type="button" class="export-card-btn" id="btnCopyCss">
+                  <strong>💻 CSSコードをコピー</strong>
+                  <span>Web実装用のスニペット</span>
+                </button>
+              </div>
+
+              <!-- CSS / Unicode 装飾コードプレビュー -->
+              <div class="code-box-wrap">
+                <div class="code-box-header">
+                  <span>CSS スニペット</span>
+                  <button type="button" class="stage-btn" id="btnCopyCssQuick">コピー</button>
+                </div>
+                <pre class="code-box" id="codeCssBox"></pre>
+              </div>
+
+              <div class="code-box-wrap" style="margin-top: var(--sp-8);">
+                <div class="code-box-header">
+                  <span>SNS用 装飾テキスト</span>
+                  <button type="button" class="stage-btn" id="btnCopyUnicodeQuick">コピー</button>
+                </div>
+                <pre class="code-box" id="codeUnicodeBox" style="max-height: 80px;"></pre>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Step Footer (直列ナビゲーション) -->
+      <div class="step-footer">
+        <div>
+          <button type="button" class="btn btn-ghost" id="btnPrevStep" style="display: none;">
+            ← 戻る
+          </button>
+          <button type="button" class="btn btn-danger" id="btnReset" title="入力を全消去します">
+            全消去
+            <span class="warning-tooltip">⚠️ 入力中のテキストと設定が消去されます</span>
+          </button>
+        </div>
+
+        <div style="display: flex; gap: var(--sp-8); align-items: center;">
+          <button type="button" class="btn btn-skip" id="btnSkipStep" style="display: none;">
+            スキップして書き出す →
+          </button>
+          <button type="button" class="btn btn-primary" id="btnNextStep">
+            プリセット選択へ進む →
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- コピー完了トーストバブル -->
+  <div class="toast-bubble" id="toastBubble">📋 クリップボードにコピーしました</div>
+
+  <!-- フッター -->
+  <footer class="footer">
+    <div class="container">
+      飾り文字工房 — 単機能・直列Webアプリケーション / @design デザインシステム準拠
+    </div>
+  </footer>
+
+  <!-- スクリプト読込 -->
+  <script src="./engine.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

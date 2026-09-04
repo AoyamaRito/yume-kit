@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Local tokens preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans JP", system-ui, sans-serif;
+      background: #111827;
+      color: #e5e7eb;
+      padding: 32px;
+      line-height: 1.5;
+    }
+    h1 { font-size: 22px; margin-bottom: 8px; }
+    .sub { color: #9ca3af; font-size: 13px; margin-bottom: 28px; }
+    h2 {
+      font-size: 12px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: #B89F5F;
+      margin: 28px 0 12px;
+      border-top: 1px solid #1f2937;
+      padding-top: 20px;
+    }
+    .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sw {
+      width: 112px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #374151;
+      background: #0b1220;
+    }
+    .sw .chip { height: 56px; }
+    .sw .meta { padding: 8px; font-size: 11px; }
+    .sw .meta b { display: block; font-size: 12px; margin-bottom: 2px; }
+    .sw .meta code { color: #9ca3af; font-size: 10px; }
+    a { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <h1>Local tokens preview</h1>
+  <p class="sub"><a href="hub.html">← hub</a> · オフライン色見本（スナップショット）</p>
+
+  <h2>14U</h2>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#0A1C3A"></div><div class="meta"><b>navy</b><code>#0A1C3A</code></div></div>
+    <div class="sw"><div class="chip" style="background:#B89F5F"></div><div class="meta"><b>gold</b><code>#B89F5F</code></div></div>
+    <div class="sw"><div class="chip" style="background:#E85D04"></div><div class="meta"><b>orange</b><code>#E85D04</code></div></div>
+  </div>
+
+  <h2>kikaku</h2>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#f8fafc"></div><div class="meta"><b>bg-light</b><code>#f8fafc</code></div></div>
+    <div class="sw"><div class="chip" style="background:#09090b"></div><div class="meta"><b>text-main</b><code>#09090b</code></div></div>
+    <div class="sw"><div class="chip" style="background:#1e40af"></div><div class="meta"><b>accent</b><code>#1e40af</code></div></div>
+  </div>
+
+  <h2>freebullet</h2>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#22314A"></div><div class="meta"><b>ink</b><code>#22314A</code></div></div>
+    <div class="sw"><div class="chip" style="background:#E8F1F8"></div><div class="meta"><b>sky</b><code>#E8F1F8</code></div></div>
+    <div class="sw"><div class="chip" style="background:#3A7BC8"></div><div class="meta"><b>blue</b><code>#3A7BC8</code></div></div>
+    <div class="sw"><div class="chip" style="background:#4A90D9"></div><div class="meta"><b>accent</b><code>#4A90D9</code></div></div>
+  </div>
+
+  <h2>SRD</h2>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#faf9f6"></div><div class="meta"><b>bg</b><code>#faf9f6</code></div></div>
+    <div class="sw"><div class="chip" style="background:#333333"></div><div class="meta"><b>primary</b><code>#333</code></div></div>
+    <div class="sw"><div class="chip" style="background:#900c3f"></div><div class="meta"><b>accent</b><code>#900c3f</code></div></div>
+    <div class="sw"><div class="chip" style="background:#c5a059"></div><div class="meta"><b>gold</b><code>#c5a059</code></div></div>
+  </div>
+
+  <h2>hudeato (current / V3)</h2>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#15181f"></div><div class="meta"><b>ink</b><code>#15181f</code></div></div>
+    <div class="sw"><div class="chip" style="background:#3b5bf5"></div><div class="meta"><b>accent</b><code>#3b5bf5</code></div></div>
+    <div class="sw"><div class="chip" style="background:#faf8f5"></div><div class="meta"><b>washi</b><code>#faf8f5</code></div></div>
+    <div class="sw"><div class="chip" style="background:#ab3b2c"></div><div class="meta"><b>urushi</b><code>#ab3b2c</code></div></div>
+  </div>
+</body>
+</html>

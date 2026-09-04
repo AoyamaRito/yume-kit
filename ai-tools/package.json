@@ -1,0 +1,19 @@
+{
+  "name": "ai-tools",
+  "version": "0.3.0",
+  "description": "ai-tools — AIエージェント運用ツール集（asset-gen, ascii-3d, webqa, vision-qa, ui-graph）",
+  "type": "module",
+  "keywords": [
+    "pi-package",
+    "ai-tools",
+    "asset-gen",
+    "ascii-3d",
+    "webqa",
+    "ui-graph",
+    "vision-qa"
+  ],
+  "pi": {
+    "skills": ["./skills"]
+  },
+  "license": "MIT"
+}

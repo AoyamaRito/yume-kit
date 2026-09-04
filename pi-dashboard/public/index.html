@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pi-dashboard</title>
+<style>
+  // @why: [2026-09-06] ユーザー要望「UIをライトモード化・フラットデザイン・わくはドットで点線・おしゃれに」
+  //   ダークテーマ（#10131a の影シャドウカード）を廃し、季節たっぷりの暖かいオフホワイト背景 + 影なしベタ塗りフラット + 
+  //   dotted 点線枠のライトテーマに刷新。状態識別はライト背景でくっきり見える濃い青/緑/赤を使い、
+  //   ヘッダ下線・バッジの白ドット・角丸フォントで「おしゃれ（フラット×点線）」を成立させる。
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+    background: #f7f5f0; color: #3b3833; padding: 14px 16px 300px;
+  }
+  header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  h1 {
+    font-size: 20px; margin: 0; letter-spacing: .04em; color: #2e2b26;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h1::before {
+    content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: #2f6fed; box-shadow: 18px 0 0 #16a34a, 36px 0 0 #dc2626; /* 3ドットのアクセント */
+    margin-right: 6px;
+  }
+  /* ヘッダ下の点線セパレータ */
+  header::after { content: ''; display: block; border-bottom: 2px dotted #d6cfc0; margin: 10px 0 0; width: 100%; }
+  #conn { font-size: 12px; color: #a29c90; }
+  #conn.on { color: #16a34a; }
+  #grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+  .card {
+    background: #ffffff; border: 1.5px dotted #cfc8b8; border-radius: 12px; padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+    transition: border-color .15s ease; box-shadow: none; /* フラット: 影なし */
+  }
+  .card:hover { border-color: #a8a08f; }
+  .card.busy { border-color: #2f6fed; background: #f5f8ff; }
+  .card.idle { border-color: #16a34a; background: #f4fbf5; }
+  .card.error { border-color: #dc2626; background: #fef5f5; }
+  .card-head { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+  .title { font-weight: 700; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #2e2b26; }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; white-space: nowrap;
+    color: #fff; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .badge::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+  .badge.busy { background: #2f6fed; }
+  .badge.idle { background: #16a34a; }
+  .badge.error { background: #dc2626; }
+  .meta { font-size: 11px; color: #9a9386; display: flex; gap: 10px; flex-wrap: wrap; }
+  .log {
+    background: #faf8f3; border: 1px dotted #e5ded0; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 1.5;
+    max-height: 100px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #3b3833;
+  }
+  .log .user { color: #1d4ed8; }
+  .log .assistant { color: #443f38; }
+  .log .state { color: #9a9386; font-style: italic; }
+  .log .cost { color: #b45309; }
+  empty-tip { font-size: 12px; color: #a29c90; padding: 8px 0; display: block; }
+
+  /* ===== 集中管理センター（下部固定チャット） ===== */
+  // @why: [2026-09-06] 監視に加えて「俺 ⇄ 集中管理LLM ⇄ 各タブ」のオーケストレーターUIを下部に常駐させる。
+  //   フラットデザインと点線を踏襲し、紫(#7c3aed)=集中管理LLMのアクセント色にする。
+  #chat {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    background: #ffffff; border-top: 1.5px dotted #cfc8b8; padding: 8px 16px 12px;
+  }
+  #chat-title { font-size: 13px; font-weight: 700; color: #2e2b26; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  #chat-title::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #7c3aed; display: inline-block; }
+  #chat-title .sub { font-size: 11px; font-weight: 400; color: #a29c90; }
+  /* 自律モードトグル */
+  .auto-toggle {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; color: #7c3aed; cursor: pointer; user-select: none;
+    border: 1px dotted #cfc8b8; border-radius: 99px; padding: 3px 12px;
+  }
+  .auto-toggle input { accent-color: #7c3aed; width: 15px; height: 15px; cursor: pointer; margin: 0; }
+  .auto-toggle.off { color: #9a9386; }
+  #chat-log {
+    height: 340px; overflow-y: auto; border: 1px dotted #e5ded0; border-radius: 10px; background: #faf8f3; padding: 8px 10px;
+    font-size: 12px; line-height: 1.55; display: flex; flex-direction: column; gap: 5px;
+  }
+  .chat-row { display: flex; gap: 8px; }
+  .chat-row .who { flex: 0 0 96px; font-weight: 700; color: #9a9386; font-size: 11px; padding-top: 1px; }
+  .chat-row.user .who { color: #1d4ed8; }
+  .chat-row.assistant .who { color: #7c3aed; }
+  .chat-row.action .who { color: #b45309; }
+  .chat-row.error .who { color: #dc2626; }
+  .chat-row.typing .body { color: #9a9386; font-style: italic; }
+  .chat-row .body { flex: 1; color: #3b3833; white-space: pre-wrap; word-break: break-word; min-width: 0; }
+  #chat-form { display: flex; gap: 8px; margin-top: 8px; }
+  #chat-input {
+    flex: 1; border: 1px solid #cfc8b8; border-radius: 10px; background: #fff; padding: 8px 12px;
+    font-size: 13px; color: #2e2b26; outline: none; font-family: inherit;
+  }
+  #chat-input:focus { border-color: #7c3aed; }
+  #chat-send { border: 0; border-radius: 10px; background: #7c3aed; color: #fff; font-weight: 700; padding: 0 20px; cursor: pointer; font-size: 13px; }
+  #chat-send:hover { background: #6d28d9; }
+  #chat-status { font-size: 11px; color: #9a9386; margin-top: 5px; min-height: 13px; }
+
+  /* ===== 集中管理ビュー（AI がターミナル・画像を一時表示） ===== */
+  // @why: [2026-09-06] ユーザー要望「AIが view にターミナルの様子や画像ファイルを見せられるように」。
+  //   チャットの上に一時プレビュー領域を設け、SSE の view イベントでターミナル内容（pre）や画像（img）を表示する。
+  #view {
+    display: none; margin-bottom: 8px; border: 1.5px dotted #7c3aed; border-radius: 10px;
+    background: #faf8f3; padding: 8px 10px; position: relative;
+  }
+  #view.show { display: block; }
+  #view-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #7c3aed; margin-bottom: 6px; }
+  #view-head .vlabel { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #view-close { border: 0; background: transparent; color: #9a9386; font-size: 14px; cursor: pointer; padding: 4px 8px; min-width: 28px; min-height: 28px; }
+  #view-close:hover { color: #dc2626; }
+  #view-body { max-height: 220px; overflow: auto; }
+  #view-body pre {
+    margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px;
+    line-height: 1.5; white-space: pre-wrap; word-break: break-word; color: #3b3833;
+  }
+  #view-body img { max-width: 100%; max-height: 220px; border-radius: 6px; display: block; }
+  #view-body .verr { color: #dc2626; font-size: 12px; }
+
+  /* ===== タブを開く ===== */
+  // @why: [2026-09-06] 集中管理センターから新しい wezterm タブ（pi）を開けるようにする。
+  #open-tab {
+    margin-left: auto; border: 1px dotted #7c3aed; background: #fff; color: #7c3aed;
+    border-radius: 99px; padding: 4px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  #open-tab:hover { background: #7c3aed; color: #fff; }
+  #tab-cwd {
+    border: 1px solid #cfc8b8; border-radius: 8px; background: #fff; padding: 4px 8px;
+    font-size: 12px; color: #2e2b26; outline: none; width: 220px; font-family: inherit;
+  }
+  #tab-cwd:focus { border-color: #7c3aed; }
+
+  /* 幅が狭いと 3 列を崩す（モバイルは 1 列） */
+  @media (max-width: 1080px) { #grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 700px)  { #grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>pi-dashboard</h1>
+  <span id="conn">接続中…</span>
+  <input id="tab-cwd" type="text" placeholder="作業ディレクトリ (例: /Users/AoyamaRito/pi_root)" autocomplete="off">
+  <button id="open-tab" type="button">＋ タブを開く</button>
+</header>
+<div id="grid"></div>
+
+<section id="chat">
+  <div id="chat-title">集中管理センター <span class="sub">入力はオーケストレーターLLMが各タブへ振り分けます</span>
+    <label class="auto-toggle off" id="auto-toggle" title="タブが空いたら自律的に次の指示を判断して送ります">
+      <input type="checkbox" id="auto-check"> 自律モード
+    </label>
+  </div>
+  <div id="view">
+    <div id="view-head"><span class="vlabel"></span><button id="view-close" title="閉じる">✕</button></div>
+    <div id="view-body"></div>
+  </div>
+  <div id="chat-log"></div>
+  <form id="chat-form">
+    <input id="chat-input" type="text" placeholder="例: 全タブの状況を整理して。Bに調査を、Cに実装を投げて" autocomplete="off">
+    <button id="chat-send" type="submit">送信</button>
+  </form>
+  <div id="chat-status"></div>
+</section>
+
+<script>
+const grid = document.getElementById('grid');
+const connEl = document.getElementById('conn');
+const chatLog = document.getElementById('chat-log');
+const chatInput = document.getElementById('chat-input');
+const chatStatus = document.getElementById('chat-status');
+const chatForm = document.getElementById('chat-form');
+const autoCheck = document.getElementById('auto-check');
+const autoToggle = document.getElementById('auto-toggle');
+const viewBox = document.getElementById('view');
+const viewLabel = viewBox.querySelector('.vlabel');
+const viewBody = document.getElementById('view-body');
+document.getElementById('view-close').addEventListener('click', () => viewBox.classList.remove('show'));
+const openTabBtn = document.getElementById('open-tab');
+const tabCwdInput = document.getElementById('tab-cwd');
+const pans = new Map(); // paneId -> { el refs, state }
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function fmtCost(n) {
+  if (n == null || !isFinite(n)) return '';
+  return '$' + Number(n).toFixed(4);
+}
+
+function ensureCard(pane) {
+  let p = pans.get(pane.paneId);
+  if (!p) {
+    const card = el('div', 'card');
+    const head = el('div', 'card-head');
+    // @why: [2026-09-06] 作業内容のまとめ（summary）をタイトルに表示。無ければ従来のタブ名。
+    const title = el('div', 'title', pane.summary || pane.title || pane.paneId);
+    const badge = el('span', 'badge', '…');
+    head.append(title, badge);
+    const meta = el('div', 'meta');
+    const log = el('div', 'log');
+    card.append(head, meta, log);
+    grid.appendChild(card);
+    p = { pane, card, badge, meta, log, title, state: null, lines: [] };
+    pans.set(pane.paneId, p);
+  }
+  return p;
+}
+
+function renderMeta(p) {
+  const bits = [];
+  if (p.pane.title) bits.push('📁 ' + p.pane.title);
+  if (p.pane.paneId) bits.push('#' + p.pane.paneId);
+  if (p.pane.session) bits.push(p.pane.session.slice(0, 20));
+  const c = fmtCost(p.pane.cost);
+  bits.push(c ? '💸 ' + c : '💸 $0.0000');
+  p.meta.textContent = bits.join(' ・ ');
+}
+
+function setState(p, state) {
+  const prev = p.state;
+  p.state = state;
+  p.card.classList.remove('busy', 'idle', 'error');
+  p.card.classList.add(state);
+  p.badge.className = 'badge ' + state;
+  p.badge.textContent = state === 'busy' ? '稼働中' : state === 'idle' ? '入力待ち' : state === 'error' ? 'エラー' : state;
+  if (prev === 'busy' && state === 'idle') notifyIdle(p);
+}
+
+function appendLine(p, entry) {
+  p.lines.push(entry);
+  if (p.lines.length > 200) p.lines.shift();
+  renderLog(p);
+}
+
+function renderLog(p) {
+  p.log.innerHTML = '';
+  const rows = p.lines.slice(-12);
+  for (const e of rows) {
+    const line = el('div', e.kind === 'state' ? 'state' : (e.role || 'state'), '');
+    if (e.kind === 'state') {
+      line.textContent = '— ' + (e.state === 'busy' ? '処理開始' : e.state === 'idle' ? '入力待ちになりました' : e.state);
+    } else {
+      const who = e.role === 'user' ? '🧑 ' : e.role === 'assistant' ? '🤖 ' : '';
+      let text = (e.text || '').replace(/\s+/g, ' ').trim();
+      if (text.length > 300) text = text.slice(0, 300) + '…';
+      line.textContent = who + text;
+      if (typeof e.cost === 'number') {
+        const c = el('span', 'cost', '  [' + fmtCost(e.cost) + ']');
+        line.appendChild(c);
+      }
+    }
+    p.log.appendChild(line);
+  }
+  p.log.scrollTop = p.log.scrollHeight;
+}
+
+function notifyIdle(p) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  try {
+    new Notification('pi: 入力待ち', { body: (p.pane.title || p.pane.paneId) + ' が指示待ちです' });
+  } catch {}
+}
+
+// ===== タブを開く（新しい wezterm タブで pi を起動） =====
+// @why: [2026-09-06] 集中管理センターから新しい pi タブを開けるようにする。
+openTabBtn.addEventListener('click', () => {
+  const cwd = tabCwdInput.value.trim() || undefined;
+  openTabBtn.disabled = true;
+  openTabBtn.textContent = '開いています…';
+  fetch('/api/tab', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ cwd }),
+  })
+    .then((r) => r.json())
+    .then((d) => {
+      if (d.ok) {
+        chatStatus.textContent = '✅ 新しいタブを開きました（pane ' + (d.paneId || '?') + ' / ' + d.cwd + '）';
+        tabCwdInput.value = '';
+      } else {
+        chatStatus.textContent = '⚠ タブを開けませんでした: ' + (d.error || '');
+      }
+    })
+    .catch((e) => { chatStatus.textContent = '⚠ タブを開けませんでした: ' + e; })
+    .finally(() => {
+      openTabBtn.disabled = false;
+      openTabBtn.textContent = '＋ タブを開く';
+    });
+});
+
+// ===== 集中管理チャット =====
+const CHAT_WHO = { user: '🧑 あなた', assistant: '🤖 集中管理', action: '⚡ 送信', error: '⚠ エラー', typing: '… 考え中' };
+
+function chatLine(kind, content) {
+  const row = el('div', 'chat-row ' + kind);
+  row.appendChild(el('div', 'who', CHAT_WHO[kind] || kind));
+  row.appendChild(el('div', 'body', content || ''));
+  chatLog.appendChild(row);
+  while (chatLog.children.length > 80) chatLog.removeChild(chatLog.firstChild);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return row;
+}
+
+function applyChat(ev) {
+  if (ev.kind === 'typing') {
+    chatStatus.textContent = '… 集中管理LLMが考えています（各タブへの振り分けを検討中）';
+    chatLine('typing', '');
+    return;
+  }
+  chatStatus.textContent = '';
+  chatLog.querySelectorAll('.chat-row.typing').forEach((x) => x.remove());
+  chatLine(ev.kind, ev.content);
+}
+
+// ===== 集中管理ビュー（ターミナル・画像の一時表示） =====
+function applyView(v) {
+  if (!v) return;
+  viewBody.innerHTML = '';
+  if (v.type === 'terminal') {
+    viewLabel.textContent = '🖥 ターミナル #' + v.paneId;
+    const pre = el('pre', '', v.text || '');
+    viewBody.appendChild(pre);
+  } else if (v.type === 'image') {
+    viewLabel.textContent = '🖼 ' + (v.path || '');
+    if (v.error) {
+      viewBody.appendChild(el('div', 'verr', '画像を開けませんでした: ' + v.error));
+    } else if (v.dataUrl) {
+      const img = document.createElement('img');
+      img.src = v.dataUrl;
+      img.alt = v.path || 'image';
+      viewBody.appendChild(img);
+    }
+  }
+  viewBox.classList.add('show');
+}
+
+// @why: [2026-09-06] 日本語 IME で変換確定の Enter が keydown と form submit の両方で拾われ、
+//       入力がダブって送信されるバグを修正。isComposing（IME 変換中）の Enter は送信せず、
+//       preventDefault で submit 発火も止める（IME 確定自体はキャンセルされない）。
+//       さらに sendChat に送信中フラグを入れ、連打・二重発火を防ぐ。
+let chatSending = false;
+function sendChat() {
+  const text = chatInput.value.trim();
+  if (!text || chatSending) return;
+  chatSending = true;
+  chatInput.value = '';
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ text }),
+  })
+    .catch(() => { chatStatus.textContent = '送信に失敗しました（サーバー停止中？）'; })
+    .finally(() => { chatSending = false; });
+}
+
+chatForm.addEventListener('submit', (e) => { e.preventDefault(); sendChat(); });
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  if (e.isComposing || e.keyCode === 229) {
+    // IME 変換中（確定 Enter）: 送信せず、form submit の発火も止める
+    e.preventDefault();
+    return;
+  }
+  if (e.shiftKey) return; // Shift+Enter は改行（現状は1行だが将来用）
+  e.preventDefault();
+  sendChat();
+});
+
+// 自律モードの状態同期・切替
+function syncAutoToggle(enabled) {
+  autoCheck.checked = !!enabled;
+  autoToggle.classList.toggle('off', !enabled);
+  autoToggle.title = enabled ? '自律モード ON: タブが空いたら自動で次の指示を送ります' : '自律モード OFF: タブが空いても自動では送りません';
+}
+fetch('/api/autonomy').then((r) => r.json()).then((s) => syncAutoToggle(s.enabled)).catch(() => {});
+autoCheck.addEventListener('change', () => {
+  fetch('/api/autonomy', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ enabled: autoCheck.checked }),
+  }).then((r) => r.json()).then((s) => syncAutoToggle(s.enabled)).catch(() => {});
+});
+
+function loadChatHistory() {
+  fetch('/api/chat/history')
+    .then((r) => r.json())
+    .then((d) => {
+      for (const e of (d.entries || [])) {
+        if (e.kind === 'typing') continue;
+        chatLine(e.kind, e.content);
+      }
+      chatLog.scrollTop = chatLog.scrollHeight;
+    })
+    .catch(() => {});
+}
+
+function applyEvent(ev) {
+  if (ev.type === 'pane') {
+    const p = ensureCard(ev.pane);
+    p.pane = { ...p.pane, ...ev.pane };
+    renderMeta(p);
+    setState(p, ev.pane.state);
+    // summary が更新されたらタイトルを差し替える
+    if (ev.pane.summary) p.title.textContent = ev.pane.summary;
+  } else if (ev.type === 'state') {
+    const p = pans.get(ev.paneId);
+    if (!p) return;
+    if (p.pane.state !== ev.state) p.pane.state = ev.state;
+    p.pane.lastAt = ev.at;
+    setState(p, ev.state);
+    appendLine(p, { kind: 'state', state: ev.state, ts: ev.at });
+  } else if (ev.type === 'log') {
+    const p = pans.get(ev.paneId);
+    if (!p) return;
+    if (typeof ev.entry.cost === 'number') p.pane.cost = (p.pane.cost || 0) + ev.entry.cost;
+    p.pane.lastAt = ev.entry.ts;
+    renderMeta(p);
+    appendLine(p, ev.entry);
+  } else if (ev.type === 'chat') {
+    applyChat(ev.entry);
+  } else if (ev.type === 'autonomy') {
+    syncAutoToggle(ev.enabled);
+  } else if (ev.type === 'view') {
+    applyView(ev.view);
+  }
+}
+
+async function load() {
+  const res = await fetch('/state');
+  const data = await res.json();
+  for (const pane of data.panes) {
+    const p = ensureCard(pane);
+    p.pane = pane;
+    renderMeta(p);
+    setState(p, pane.state);
+    for (const ln of pane.lines) appendLine(p, ln);
+  }
+  if (data.panes.length === 0) {
+    const tip = el('empty-tip', '', '監視対象の pi がまだ接続していません（拡張 pi-watch.ts が loaded され、サーバーへ登録されるとここに現れます）。');
+    grid.appendChild(tip);
+  }
+}
+
+function connect() {
+  const es = new EventSource('/events');
+  es.onopen = () => { connEl.textContent = '● 接続済み'; connEl.className = 'on'; };
+  es.onerror = () => { connEl.textContent = '○ 再接続待ち'; connEl.className = ''; };
+  es.onmessage = (e) => { try { applyEvent(JSON.parse(e.data)); } catch {} };
+}
+
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+load();
+loadChatHistory();
+connect();
+</script>
+</body>
+</html>

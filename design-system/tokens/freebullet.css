@@ -1,0 +1,24 @@
+/* free bullet LP — local tokens
+ * Source: freebullet-lp/index.html (:root)
+ */
+:root {
+  --ink: #22314A;
+  --ink-soft: #333333;
+  --steel: #5B6B82;
+  --paper: #FFFFFF;
+  --sky: #E8F1F8;
+  --sky-2: #D4E6F4;
+  --sky-3: #D0DDE8;
+  --blue: #3A7BC8;
+  --blue-2: #4A90D9;
+  --accent: #4A90D9;
+  --accent-hover: #3A7BC8;
+  --line: rgba(34, 49, 74, 0.10);
+  --line-sky: #C6DAEC;
+  --shadow: 0 22px 50px -30px rgba(58, 123, 200, 0.35);
+  --serif: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  --sans: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --mono: "Space Grotesk", "SF Mono", "Menlo", monospace;
+  --max: 1180px;
+  --ease: cubic-bezier(0.22, 0.9, 0.32, 1);
+}

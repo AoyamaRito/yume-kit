@@ -1,0 +1,13 @@
+{
+  "name": "ui-graph",
+  "version": "1.0.0",
+  "description": "Web UIからロジカルグラフ（配置・重なり・遮蔽・A11y）を自動抽出し異常を検知するツール",
+  "type": "module",
+  "main": "ui-graph.mjs",
+  "scripts": {
+    "test": "node test.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.55.0"
+  }
+}

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>デザインとは、情報の整理である</title>
+<style>
+  :root {
+    --bg: #fdf7ee;
+    --panel: #ffffff;
+    --panel2: #fff1dd;
+    --ink: #453f36;
+    --muted: #8a8276;
+    --accent: #ee7524;
+    --accent2: #2aa8a0;
+    --accent3: #e85d9e;
+    --marker: #ffe17a;
+    --bad: #e05563;
+    --good: #3fa96e;
+    --line: #ece3d4;
+    --shadow: 0 6px 18px rgba(120, 90, 40, .10);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium", "Noto Sans JP", sans-serif;
+    overflow: hidden;
+  }
+  .serif { font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif; }
+
+  /* ===== stage & deck (16:9 固定をスケール) ===== */
+  #stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #deck {
+    width: 1280px; height: 720px;
+    position: relative;
+    transform-origin: center center;
+  }
+  section.slide {
+    position: absolute; inset: 0;
+    padding: 70px 90px;
+    display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden;
+    transform: translateX(24px);
+    transition: opacity .35s ease, transform .35s ease, visibility .35s;
+  }
+  section.slide.active {
+    opacity: 1; visibility: visible;
+    transform: translateX(0);
+  }
+
+  /* ===== 共通パーツ ===== */
+  .kicker {
+    font-size: 15px; letter-spacing: .28em; color: var(--accent);
+    font-weight: 700; margin-bottom: 18px;
+  }
+  h1 { font-size: 64px; line-height: 1.35; font-weight: 700; }
+  h2 { font-size: 44px; line-height: 1.4; font-weight: 700; margin-bottom: 34px; }
+  h2 .num {
+    display: inline-block; color: #fff; background: var(--accent);
+    font-size: 28px; vertical-align: middle;
+    border-radius: 50%;
+    width: 52px; height: 52px; line-height: 52px; text-align: center;
+    margin-right: 18px;
+  }
+  .hl {
+    background: linear-gradient(transparent 60%, var(--marker) 60%);
+    padding: 0 4px;
+  }
+  p.lead { font-size: 26px; line-height: 1.9; color: var(--ink); }
+  .muted { color: var(--muted); }
+  .accent { color: var(--accent); }
+  .note {
+    margin-top: auto; font-size: 19px; color: var(--muted);
+    border-left: 4px solid var(--accent); padding-left: 16px; line-height: 1.7;
+  }
+  .cols { display: flex; gap: 36px; flex: 1; min-height: 0; }
+  .col { flex: 1; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 28px 30px;
+    box-shadow: var(--shadow);
+  }
+  .card h3 { font-size: 24px; margin-bottom: 12px; }
+  .card p { font-size: 19px; line-height: 1.8; color: var(--muted); }
+  .card p b { color: var(--ink); }
+  .tag {
+    display: inline-block; font-size: 15px; font-weight: 800;
+    padding: 5px 16px; border-radius: 999px; margin-bottom: 14px;
+    letter-spacing: .1em;
+  }
+  .tag.bad  { background: #fde6e8; color: var(--bad); }
+  .tag.good { background: #ddf3e6; color: var(--good); }
+
+  /* ===== 3つの問い ===== */
+  .three { display: flex; gap: 30px; margin-top: 10px; }
+  .three .q {
+    flex: 1; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 18px; padding: 34px 30px; position: relative;
+    box-shadow: var(--shadow);
+    border-top: 6px solid var(--accent);
+  }
+  .three .q:nth-child(2) { border-top-color: var(--accent2); }
+  .three .q:nth-child(3) { border-top-color: var(--accent3); }
+  .three .q .qnum {
+    position: absolute; top: -22px; left: 26px;
+    background: var(--accent); color: #fff;
+    width: 42px; height: 42px; border-radius: 50%;
+    font-weight: 800; font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow);
+  }
+  .three .q:nth-child(2) .qnum { background: var(--accent2); }
+  .three .q:nth-child(3) .qnum { background: var(--accent3); }
+  .three .q h3 { font-size: 30px; margin: 8px 0 6px; }
+  .three .q .en { font-size: 13px; letter-spacing: .22em; color: var(--muted); font-weight: 800; }
+  .three .q p { font-size: 18px; line-height: 1.8; color: var(--muted); }
+  .three .q p b { color: var(--ink); }
+
+  /* ===== ポスター before/after ===== */
+  .poster {
+    background: #fff; color: #3a3a3a; border-radius: 12px;
+    height: 360px; padding: 26px 24px; display: flex; flex-direction: column;
+    box-shadow: 0 12px 28px rgba(120, 90, 40, .18);
+    border: 1px solid var(--line);
+  }
+  .poster.before { justify-content: space-around; text-align: center; }
+  .poster.before div { font-size: 17px; font-weight: 600; line-height: 1.5; }
+  .poster.after { text-align: center; justify-content: center; gap: 10px; }
+  .poster.after .off { font-size: 84px; font-weight: 900; color: #e8452c; line-height: 1.1; }
+  .poster.after .off small { font-size: 32px; }
+  .poster.after .when { font-size: 26px; font-weight: 800; }
+  .poster.after .what { font-size: 18px; font-weight: 600; color: #777; }
+  .poster.after .where { font-size: 13px; color: #999; margin-top: 12px; }
+
+  /* ===== 洗濯機パネル ===== */
+  .panelmock {
+    background: #eef1f5; border-radius: 14px; height: 300px;
+    padding: 22px; display: flex; flex-direction: column; gap: 14px;
+    box-shadow: 0 12px 28px rgba(120, 90, 40, .15);
+    border: 1px solid #dfe4ec;
+  }
+  .panelmock .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; flex: 1; }
+  .btn-s {
+    background: #fff; color: #555; border: 1px solid #c5ccd8;
+    border-radius: 8px; font-size: 11px; padding: 8px 6px;
+    width: 74px; text-align: center; font-weight: 600;
+  }
+  .btn-start {
+    background: #3fa96e; color: #fff; border-radius: 16px;
+    font-size: 26px; font-weight: 800; padding: 26px 10px;
+    width: 300px; text-align: center; letter-spacing: .1em;
+    box-shadow: 0 5px 0 #2c7a4e;
+  }
+  .btn-sub {
+    background: #fff; color: #555; border: 1px solid #c5ccd8;
+    border-radius: 10px; font-size: 15px; padding: 14px 8px;
+    width: 120px; text-align: center; font-weight: 700;
+  }
+  .panel-label { font-size: 13px; color: #7a8394; text-align: center; font-weight: 700; letter-spacing: .1em; }
+
+  /* ===== 視線誘導デモ ===== */
+  .gazebox {
+    background: #fff; border-radius: 12px; position: relative;
+    height: 380px; padding: 26px; color: #3a3a3a;
+    box-shadow: 0 12px 28px rgba(120, 90, 40, .18);
+    border: 1px solid var(--line); overflow: hidden;
+  }
+  .gazebox .headline { font-size: 27px; font-weight: 900; line-height: 1.3; width: 300px; }
+  .gazebox .logo {
+    position: absolute; top: 26px; right: 26px;
+    width: 58px; height: 58px; border-radius: 50%;
+    border: 2px solid #3a3a3a; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800;
+  }
+  .gazebox .desc {
+    position: absolute; left: 26px; bottom: 34px;
+    font-size: 12px; color: #a09a8d; line-height: 1.7; width: 210px;
+  }
+  .gazebox .cta {
+    position: absolute; right: 26px; bottom: 30px;
+    background: #e8452c; color: #fff; font-weight: 800; font-size: 18px;
+    padding: 14px 30px; border-radius: 10px;
+  }
+  .gazebox svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .gnum {
+    position: absolute; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-weight: 800; font-size: 17px;
+    display: flex; align-items: center; justify-content: center; z-index: 2;
+    box-shadow: 0 3px 8px rgba(120, 90, 40, .3);
+  }
+
+  /* ===== 余白グループ化デモ ===== */
+  .menubox {
+    background: #fff; color: #3a3a3a; border-radius: 12px; height: 380px;
+    padding: 30px 44px; box-shadow: 0 12px 28px rgba(120, 90, 40, .18);
+    border: 1px solid var(--line);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .menubox .item { display: flex; justify-content: space-between; font-size: 17px; font-weight: 600; padding: 6px 0; }
+  .menubox.even .item { padding: 16px 0; }
+  .menubox .gap { height: 44px; }
+  .menubox .glabel { font-size: 11px; color: var(--accent2); letter-spacing: .25em; font-weight: 800; padding-bottom: 4px; }
+
+  /* ===== 目立たせデモ ===== */
+  .dots {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 30px 34px; margin-top: 8px;
+    box-shadow: var(--shadow);
+  }
+  .dot { width: 46px; height: 46px; border-radius: 12px; background: #e3dbcc; flex: 0 0 auto; }
+  .dot.hero { background: var(--accent); margin-left: 80px; width: 58px; height: 58px; }
+  .dots .dlabel { margin-left: auto; font-size: 17px; color: var(--muted); line-height: 1.7; padding-left: 20px; }
+
+  /* ===== 表 ===== */
+  table.matrix { width: 100%; border-collapse: collapse; font-size: 20px; background: var(--panel); box-shadow: var(--shadow); border-radius: 12px; }
+  table.matrix th, table.matrix td {
+    border: 1px solid var(--line); padding: 16px 18px; text-align: left; line-height: 1.5;
+  }
+  table.matrix th { background: var(--panel2); color: var(--accent); font-size: 18px; letter-spacing: .05em; }
+  table.matrix td:first-child { color: var(--ink); font-weight: 700; background: #fffaf2; }
+  table.matrix td { color: var(--muted); }
+
+  /* ===== リスト ===== */
+  ul.points { list-style: none; font-size: 24px; line-height: 1.7; }
+  ul.points li { padding: 14px 0 14px 40px; position: relative; }
+  ul.points li::before {
+    content: ""; position: absolute; left: 8px; top: 26px;
+    width: 12px; height: 12px; background: var(--accent); border-radius: 3px;
+    transform: rotate(45deg);
+  }
+  ul.points li b { color: var(--accent); }
+
+  /* ===== テンプレ記入欄 ===== */
+  .fill { font-size: 28px; line-height: 2.4; }
+  .fill .blank {
+    display: inline-block; min-width: 420px;
+    border-bottom: 3px dashed #d8cdb9; color: var(--muted);
+    font-size: 20px; padding: 0 12px;
+  }
+
+  /* ===== UI(進捗・ページ番号・ナビ) ===== */
+  #progress {
+    position: fixed; left: 0; bottom: 0; height: 5px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3)); width: 0%;
+    transition: width .3s ease; z-index: 10;
+  }
+  #pagenum {
+    position: fixed; right: 26px; bottom: 18px;
+    font-size: 14px; color: var(--muted); z-index: 10;
+    font-variant-numeric: tabular-nums; letter-spacing: .1em;
+  }
+  #hint {
+    position: fixed; left: 26px; bottom: 18px;
+    font-size: 12px; color: #c2b8a6; z-index: 10;
+  }
+  .navzone { position: fixed; top: 0; bottom: 0; width: 18%; z-index: 5; cursor: pointer; }
+  #prevzone { left: 0; } #nextzone { right: 0; }
+
+  /* ===== 印刷(PDF化)===== */
+  @media print {
+    body { overflow: visible; background: var(--bg); }
+    #stage { position: static; display: block; }
+    #deck { width: auto; height: auto; transform: none !important; }
+    section.slide {
+      position: relative; inset: auto;
+      opacity: 1; visibility: visible; transform: none;
+      width: 1280px; height: 720px;
+      page-break-after: always;
+    }
+    #progress, #pagenum, #hint, .navzone { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+<div id="deck">
+
+  <!-- 1. タイトル -->
+  <section class="slide" style="justify-content:center;">
+    <div class="kicker">DESIGN LECTURE</div>
+    <h1 class="serif">デザインとは、<br><span class="hl">情報の整理</span>である。</h1>
+    <p class="lead" style="margin-top:36px;">グラフィック、ゲーム、工業デザイン——<br>分野を貫く、たったひとつの考え方。</p>
+  </section>
+
+  <!-- 2. 誤解を解く -->
+  <section class="slide">
+    <h2>まず、誤解を解くところから</h2>
+    <div class="cols" style="align-items:stretch;">
+      <div class="col card" style="border-top: 6px solid var(--bad);">
+        <div class="tag bad">✕ よくある誤解</div>
+        <h3>デザイン=<br>センスで見た目を飾ること</h3>
+        <p>「かっこよくして」「おしゃれにして」。装飾から入ると、伝わるかどうかは運まかせになる。</p>
+      </div>
+      <div class="col card" style="border-top: 6px solid var(--good);">
+        <div class="tag good">○ 本当の仕事</div>
+        <h3>伝わるように<br>情報を組み立てること</h3>
+        <p>何を目立たせ、何を引っ込め、何を捨てるか。<b>装飾は「整理が済んだあと」に自然についてくる結果。</b></p>
+      </div>
+    </div>
+    <p class="note">見た目の美しさは目的ではなく、整理の副産物。</p>
+  </section>
+
+  <!-- 3. 3つの問い -->
+  <section class="slide">
+    <h2>デザインは、この3つを決める仕事</h2>
+    <div class="three">
+      <div class="q">
+        <div class="qnum">1</div>
+        <div class="en">TARGET</div>
+        <h3>誰に</h3>
+        <p>ターゲット。その人は何を知っていて、何を知らないか。どんな状況で目にするか。</p>
+      </div>
+      <div class="q">
+        <div class="qnum">2</div>
+        <div class="en">INFORMATION</div>
+        <h3>どんな情報を</h3>
+        <p>製品の情報。スペックの羅列ではなく、<b>相手が得られるもの</b>に翻訳する。</p>
+      </div>
+      <div class="q">
+        <div class="qnum">3</div>
+        <div class="en">EXPRESSION</div>
+        <h3>どう伝えるか</h3>
+        <p>伝え方。大きさ・配置・色・言葉・質感・体験。手段はすべてここに属する。</p>
+      </div>
+    </div>
+    <p class="note">順番が大事。<span class="accent">「どう伝えるか」から始めた瞬間、デザインは装飾に堕ちる。</span></p>
+  </section>
+
+  <!-- 4. 誰に -->
+  <section class="slide">
+    <h2><span class="num">1</span>誰に —— 相手が変われば、正解が変わる</h2>
+    <ul class="points">
+      <li>同じ製品でも、<b>初めての人/毎日使う人/買うか迷っている人</b>では必要な情報がまったく違う</li>
+      <li>ターゲットを決めるとは、<b>「誰に伝えないか」を決める</b>こと</li>
+      <li>考えるのは3点:その人の<b>知識・状況・目的</b></li>
+    </ul>
+    <p class="note">「みんなに伝わるように」は、誰にも伝わらないデザインの入口。</p>
+  </section>
+
+  <!-- 5. どんな情報を -->
+  <section class="slide">
+    <h2><span class="num">2</span>どんな情報を —— 全部は、伝わらない</h2>
+    <ul class="points">
+      <li>整理とは情報を<b>足す</b>ことではなく<b>捨てる</b>こと</li>
+      <li>問い:<b>ひとつだけ持ち帰ってもらえるなら、何か?</b></li>
+      <li>スペックの列挙 → <b>相手が得られるもの(ベネフィット)</b>へ翻訳する</li>
+    </ul>
+    <p class="note">捨てた情報は消えるのではない。2番手・3番手として小さく生き残る。順位をつけるのが整理。</p>
+  </section>
+
+  <!-- 6. どう伝えるか -->
+  <section class="slide">
+    <h2><span class="num">3</span>どう伝えるか —— 重要度の差を、見た目の差に</h2>
+    <p class="lead" style="margin-bottom:30px;">一番大事な情報を、一番<b class="accent">大きく</b>・一番<b class="accent">先に</b>・一番<b class="accent">目立つ形</b>で。</p>
+    <div class="cols">
+      <div class="col card"><h3>手段の道具箱</h3><p>大きさ/位置/順番/色/言葉/形/質感/音/体験——すべて「重要度の差」を表現するための道具。</p></div>
+      <div class="col card"><h3>鉄則</h3><p><b>全部を目立たせる=何も目立たない。</b>差をつけることを恐れると、整理は失敗する。</p></div>
+    </div>
+    <p class="note">ここから、3つの分野で同じ考え方が働くのを見ていく。</p>
+  </section>
+
+  <!-- 7. 事例1 グラフィック -->
+  <section class="slide">
+    <h2>事例① グラフィック —— セール告知</h2>
+    <div class="cols">
+      <div class="col">
+        <div class="tag bad">整理前</div>
+        <div class="poster before">
+          <div>創業祭セールのお知らせ</div>
+          <div>日頃のご愛顧に感謝して全品対象</div>
+          <div>10月18日(土)〜20日(月)</div>
+          <div>最大50%OFF</div>
+          <div>〇〇ショッピングモール 2F 特設会場</div>
+          <div>お問い合わせ 000-0000-0000</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="tag good">整理後</div>
+        <div class="poster after">
+          <div class="off">50<small>%OFF</small></div>
+          <div class="when">10.18 sat — 20 mon</div>
+          <div class="what">創業祭・全品対象</div>
+          <div class="where">〇〇ショッピングモール 2F 特設会場</div>
+        </div>
+      </div>
+    </div>
+    <p class="note">内容は一字も変えていない。<span class="accent">順位をつけて、差を見た目に翻訳しただけ。</span>通行人に3秒で「50%OFF」が残る。</p>
+  </section>
+
+  <!-- 8. 事例2 ゲーム -->
+  <section class="slide">
+    <h2>事例② ゲーム —— ファミリー層に売る</h2>
+    <div class="three" style="margin-bottom:26px;">
+      <div class="q"><div class="qnum">1</div><h3 style="font-size:24px;">誰に</h3><p>ファミリー層。ゲームに詳しくない親と、子ども。</p></div>
+      <div class="q"><div class="qnum">2</div><h3 style="font-size:24px;">どんな情報を</h3><p>「親子で<b>楽しい時間を共有できる</b>」。得られるのは会話・笑い・週末の思い出。</p></div>
+      <div class="q"><div class="qnum">3</div><h3 style="font-size:24px;">どう伝えるか</h3><p>スペック表ではなく、<b>リビングで笑い合う光景</b>を見せる。</p></div>
+    </div>
+    <div class="cols" style="flex:0 0 auto;">
+      <div class="col card"><p style="font-size:21px;"><span class="tag bad" style="margin:0 10px 0 0;">✕</span>4K対応・60fps・収録500ステージ</p></div>
+      <div class="col card"><p style="font-size:21px;"><span class="tag good" style="margin:0 10px 0 0;">○</span>「今夜は、親子でひと勝負。」</p></div>
+    </div>
+    <p class="note">同じゲームをコアゲーマーに売るなら、選ぶ情報も見せ方も変わる(やり込みの深さ・競技性)。<span class="accent">製品は同じでも、ターゲットが変われば整理が変わる。</span></p>
+  </section>
+
+  <!-- 9. 事例3 洗濯機(操作) -->
+  <section class="slide">
+    <h2>事例③ 工業デザイン —— 洗濯機の操作パネル</h2>
+    <div class="cols">
+      <div class="col">
+        <div class="tag bad">整理前 —— 全機能が同格</div>
+        <div class="panelmock">
+          <div class="row">
+            <div class="btn-s">標準</div><div class="btn-s">おいそぎ</div><div class="btn-s">ドライ</div><div class="btn-s">毛布</div><div class="btn-s">槽洗浄</div>
+            <div class="btn-s">つけおき</div><div class="btn-s">すすぎ1回</div><div class="btn-s">脱水のみ</div><div class="btn-s">予約</div><div class="btn-s">チャイルドロック</div>
+            <div class="btn-s">温水</div><div class="btn-s">自動投入</div><div class="btn-s">スタート</div><div class="btn-s">乾燥</div><div class="btn-s">エコ</div>
+          </div>
+          <div class="panel-label">どれを押せばいいのか、毎回考えさせられる</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="tag good">整理後 —— 使用頻度=優先順位</div>
+        <div class="panelmock">
+          <div class="row"><div class="btn-start">スタート(標準)</div></div>
+          <div class="row" style="flex:0 0 auto;">
+            <div class="btn-sub">おいそぎ</div><div class="btn-sub">乾燥まで</div><div class="btn-sub">その他コース ≡</div>
+          </div>
+          <div class="panel-label">毎日の洗濯は、迷わず一発</div>
+        </div>
+      </div>
+    </div>
+    <p class="note">誰に=毎日使う生活者。どんな情報を=「いつもの洗濯はこれを押すだけ」。どう伝えるか=<span class="accent">ボタンの大小と配置</span>。月1回の機能はメニューの奥へ。</p>
+  </section>
+
+  <!-- 10. 同じ洗濯機、違う狙い -->
+  <section class="slide">
+    <h2>同じ洗濯機でも、狙いが変われば整理が変わる</h2>
+    <div class="cols">
+      <div class="col card" style="border-top: 6px solid var(--accent);">
+        <h3 class="accent" style="font-size:26px;">操作のためのデザイン</h3>
+        <p style="font-size:20px;"><b>誰に:</b>毎日使う人<br>
+        <b>情報:</b>迷わず操作できること<br>
+        <b>伝え方:</b>よく使うボタンを大きく手前に。機能を隠してでもシンプルに。</p>
+      </div>
+      <div class="col card" style="border-top: 6px solid var(--accent2);">
+        <h3 style="color:var(--accent2); font-size:26px;">売るためのデザイン</h3>
+        <p style="font-size:20px;"><b>誰に:</b>売り場で買い替えを検討する客<br>
+        <b>情報:</b>多機能な高級機であること<br>
+        <b>伝え方:</b>金属やガラスの質感、精緻な表示、豊富な機能が「見える」構成。</p>
+      </div>
+    </div>
+    <p class="note">「迷わせない整理」と「格を伝える整理」は軸が違う。ときに衝突する——<span class="accent">だからこそ、どの情報を優先するかを先に決める。</span>それがデザインの意思決定。</p>
+  </section>
+
+  <!-- 11. 横断まとめ表 -->
+  <section class="slide">
+    <h2>分野が違っても、やっていることは同じ</h2>
+    <table class="matrix">
+      <tr><th style="width:24%;">分野</th><th>誰に</th><th>どんな情報を</th><th>どう伝えるか</th></tr>
+      <tr><td>グラフィック<br><span class="muted" style="font-size:15px;">セール告知</span></td><td>通行人</td><td>50%OFF・いつ</td><td>大きさと順番</td></tr>
+      <tr><td>ゲーム<br><span class="muted" style="font-size:15px;">プロモーション</span></td><td>ファミリー層</td><td>親子で楽しい時間を共有できる</td><td>光景とコピー</td></tr>
+      <tr><td>工業デザイン<br><span class="muted" style="font-size:15px;">洗濯機・操作</span></td><td>毎日使う人</td><td>いつもの洗濯はこれだけ</td><td>ボタンの大小と配置</td></tr>
+      <tr><td>工業デザイン<br><span class="muted" style="font-size:15px;">洗濯機・売り場</span></td><td>検討中の客</td><td>上位モデルである</td><td>質感・表示の精緻さ</td></tr>
+    </table>
+    <p class="note">埋める欄はいつも同じ3つ。<span class="accent">分野の違いは「伝え方の道具」の違いでしかない。</span></p>
+  </section>
+
+  <!-- 12. 道具箱 -->
+  <section class="slide">
+    <h2>情報整理の基本道具</h2>
+    <div class="three" style="margin-bottom:24px;">
+      <div class="q"><h3 style="font-size:24px;">近接</h3><p>関係あるものを近づける。<b>「これとこれは仲間」</b>という情報を距離で伝える。</p></div>
+      <div class="q"><h3 style="font-size:24px;">整列</h3><p>見えない線で揃える。<b>「秩序がある」</b>という情報を伝え、迷いを減らす。</p></div>
+      <div class="q"><h3 style="font-size:24px;">対比</h3><p>差をはっきりつける。<b>「こっちが大事」</b>という優先順位を伝える。</p></div>
+    </div>
+    <div class="cols" style="flex:0 0 auto;">
+      <div class="col card"><h3>反復</h3><p>同じルールを繰り返す。「同じ種類のもの」だと学習させる。</p></div>
+      <div class="col card"><h3>フィードバック・アフォーダンス・質感</h3><p>ゲームやプロダクトでは:何が起きたか/何ができそうか/どんな格のものか——を伝える道具。</p></div>
+    </div>
+    <p class="note">どれも飾りの技法ではなく、<span class="accent">情報を伝えるための道具。</span>次の3枚で、実際の使い方を見る。</p>
+  </section>
+
+  <!-- 13. 視線の移動設計 -->
+  <section class="slide">
+    <h2>視線は、流れる —— 移動を設計する</h2>
+    <div class="cols">
+      <div class="col" style="display:flex; flex-direction:column; gap:18px;">
+        <div class="card"><h3>視線が流れる方向</h3><p><b>大きい→小さい</b>、<b>濃い→薄い</b>、そして<b>左上→右下</b>へ。ざっと見る媒体は<b>Z型</b>、読み込む媒体(Web・文書)は<b>F型</b>。</p></div>
+        <div class="card"><h3>順路を先に決める</h3><p>見る順番(①→②→③→④)を<b>配置の前に決める</b>。読者まかせにしない。①で掴み、途中で理解させ、<b>視線の終点に「してほしいこと」</b>を置く。</p></div>
+      </div>
+      <div class="col">
+        <div class="gazebox">
+          <svg viewBox="0 0 520 380" preserveAspectRatio="none">
+            <defs>
+              <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="#ee7524"/>
+              </marker>
+            </defs>
+            <path d="M 170 75 L 415 60 L 110 285 L 370 300" stroke="#ee7524" stroke-width="3.5" fill="none" stroke-dasharray="9 9" marker-end="url(#arr)" opacity=".85"/>
+          </svg>
+          <div class="gnum" style="left:20px; top:20px;">1</div>
+          <div class="headline" style="margin:14px 0 0 40px;">週末は、<br>森のマルシェへ。</div>
+          <div class="gnum" style="right:96px; top:32px;">2</div>
+          <div class="logo">LOGO</div>
+          <div class="gnum" style="left:20px; bottom:104px;">3</div>
+          <div class="desc">焼きたてパン、季節の野菜、コーヒー。毎月第3土曜、中央公園にて。入場無料・雨天決行。</div>
+          <div class="gnum" style="right:196px; bottom:44px;">4</div>
+          <div class="cta">MAPを見る →</div>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:24px;">視線の通り道から外れた情報は、存在しないのと同じ。<span class="accent">迷子になった視線は、そのまま立ち去る。</span></p>
+  </section>
+
+  <!-- 14. 余白によるグループ化 -->
+  <section class="slide">
+    <h2>余白は、情報である —— 余白によるグループ化</h2>
+    <div class="cols">
+      <div class="col">
+        <div class="tag bad">等間隔 —— 関係が見えない</div>
+        <div class="menubox even">
+          <div class="item"><span>コーヒー</span><span>500円</span></div>
+          <div class="item"><span>カフェラテ</span><span>550円</span></div>
+          <div class="item"><span>紅茶</span><span>500円</span></div>
+          <div class="item"><span>チーズケーキ</span><span>480円</span></div>
+          <div class="item"><span>ガトーショコラ</span><span>520円</span></div>
+          <div class="item"><span>プリン</span><span>450円</span></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="tag good">余白だけで、グループが見える</div>
+        <div class="menubox">
+          <div class="glabel">DRINK</div>
+          <div class="item"><span>コーヒー</span><span>500円</span></div>
+          <div class="item"><span>カフェラテ</span><span>550円</span></div>
+          <div class="item"><span>紅茶</span><span>500円</span></div>
+          <div class="gap"></div>
+          <div class="glabel">SWEETS</div>
+          <div class="item"><span>チーズケーキ</span><span>480円</span></div>
+          <div class="item"><span>ガトーショコラ</span><span>520円</span></div>
+          <div class="item"><span>プリン</span><span>450円</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:24px;">近い=仲間、遠い=別グループ。<span class="accent">枠線や罫線を足す前に、余白で整理する。</span>枠は増えるほどノイズになる。余白は「何もない場所」ではなく、関係を伝える情報。</p>
+  </section>
+
+  <!-- 15. 目立たせたいかどうか -->
+  <section class="slide">
+    <h2>すべての要素に問う ——「これは、目立たせたいのか?」</h2>
+    <div class="cols" style="flex:0 0 auto; margin-bottom:24px;">
+      <div class="col card" style="border-top: 6px solid var(--accent);">
+        <h3 class="accent">目立たせる手段</h3>
+        <p>大きく・濃く・色を変える。そして最強の手段は<b>孤立させる</b>こと——余白で囲まれたものに、視線は吸い寄せられる。</p>
+      </div>
+      <div class="col card" style="border-top: 6px solid var(--accent2);">
+        <h3 style="color:var(--accent2);">引っ込める手段</h3>
+        <p>引っ込める=消すことではない。<b>薄く・小さく・奥へ。</b>注記や補足は「読みたい人だけ読める」濃度に下げる。</p>
+      </div>
+    </div>
+    <div class="dots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot hero"></div>
+      <div class="dlabel">同じ形でも、<b style="color:var(--ink)">色+孤立</b>で<br>視線は勝手に集まる</div>
+    </div>
+    <p class="note">注意は予算。<span class="accent">目立たせるものを増やすほど、1つあたりの目立ちは薄まる。</span>「目立たせない」と決めることも、立派なデザインの意思決定。</p>
+  </section>
+
+  <!-- 16. 失敗パターン -->
+  <section class="slide">
+    <h2>整理が失敗する3つのパターン</h2>
+    <ul class="points" style="font-size:26px;">
+      <li><b>「全部大事」</b> —— 全部目立たせて、全部埋もれる。<span class="muted" style="font-size:20px;">→ ひとつだけ選ぶ勇気。</span></li>
+      <li><b>作り手の都合の順番</b> —— 組織図どおりのメニュー、開発が苦労した機能ほど大きく。<span class="muted" style="font-size:20px;">→ 順番を決めるのは相手の目的。</span></li>
+      <li><b>「どう」から始める</b> —— 飾ってから中身を考える。<span class="muted" style="font-size:20px;">→ 誰に・何を、が先。</span></li>
+    </ul>
+    <p class="note">どれも根っこは同じ。<span class="accent">「誰に・どんな情報を」を飛ばして「どう伝えるか」に手を出した結果。</span></p>
+  </section>
+
+  <!-- 17. 実践テンプレ -->
+  <section class="slide">
+    <h2>実践 —— 作る前に、3行書く</h2>
+    <div class="fill">
+      <span class="accent" style="font-weight:700;">誰に:</span><span class="blank">例)ゲームに詳しくない親子</span><br>
+      <span class="accent" style="font-weight:700;">これだけは伝える:</span><span class="blank">例)一緒に遊ぶと楽しい時間になる</span><br>
+      <span class="accent" style="font-weight:700;">だから一番目立つのは:</span><span class="blank">例)家族で笑い合っている光景</span>
+    </div>
+    <div class="cols" style="flex:0 0 auto; margin-top:36px;">
+      <div class="col card"><h3>チェック①</h3><p>3秒だけ見せて隠す。何が残ったか聞く。残ったものが「これだけは」と一致していれば合格。</p></div>
+      <div class="col card"><h3>チェック②</h3><p>ターゲットに近い人に、説明なしの初見で見せる。作った本人には、もう見えないものがある。</p></div>
+    </div>
+  </section>
+
+  <!-- 18. まとめ -->
+  <section class="slide" style="justify-content:center; text-align:center;">
+    <p class="kicker" style="letter-spacing:.3em;">CONCLUSION</p>
+    <h1 class="serif" style="font-size:56px;">デザインとは、<span class="hl">情報の整理</span>である。</h1>
+    <p class="lead" style="margin-top:40px; font-size:30px;"><span class="accent" style="font-weight:700;">誰に</span> —— <span style="color:var(--accent2); font-weight:700;">どんな情報を</span> —— <span style="color:var(--accent3); font-weight:700;">どう伝えるか</span>。</p>
+    <p class="lead muted" style="margin-top:28px; font-size:22px;">装飾は結果。<br>見た人を迷わせないことが、デザインの仕事。</p>
+  </section>
+
+</div>
+</div>
+
+<div id="progress"></div>
+<div id="pagenum"></div>
+<div id="hint">← → キー / 画面端クリックで移動 ・ F 全画面 ・ 印刷でPDF化</div>
+<div class="navzone" id="prevzone" title="前へ"></div>
+<div class="navzone" id="nextzone" title="次へ"></div>
+
+<script>
+(function () {
+  const slides = Array.from(document.querySelectorAll('section.slide'));
+  const total = slides.length;
+  let current = 0;
+
+  // URLハッシュから復元
+  const h = parseInt(location.hash.slice(1), 10);
+  if (!isNaN(h) && h >= 1 && h <= total) current = h - 1;
+
+  function show(i) {
+    current = Math.max(0, Math.min(total - 1, i));
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+    document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+    document.getElementById('pagenum').textContent = (current + 1) + ' / ' + total;
+    history.replaceState(null, '', '#' + (current + 1));
+  }
+
+  function fit() {
+    const scale = Math.min(innerWidth / 1280, innerHeight / 720) * 0.96;
+    document.getElementById('deck').style.transform = 'scale(' + scale + ')';
+  }
+
+  addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') { e.preventDefault(); show(current + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') { e.preventDefault(); show(current - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(total - 1);
+    else if (e.key === 'f' || e.key === 'F') {
+      document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+    }
+  });
+
+  document.getElementById('nextzone').addEventListener('click', () => show(current + 1));
+  document.getElementById('prevzone').addEventListener('click', () => show(current - 1));
+  addEventListener('resize', fit);
+
+  fit();
+  show(current);
+})();
+</script>
+</body>
+</html>

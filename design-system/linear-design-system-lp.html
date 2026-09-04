@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="ja" data-accent="vermilion">
+<head>
+  <meta charset="UTF-8">
+  <!-- @why: 単機能・直列Webアプリデザインシステム（線の省略・余白による境界・暗転DONE・左右HUD・エラー振動・回転点線枠） -->
+  <!-- @tags: SPEC, DESIGN_SYSTEM, LP, FIBONACCI, BORDERLESS, ERROR_SHAKE, MARCHING_DOTS, DIM_DONE, SHORTCUT_HUD -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>単機能・直列Webアプリ デザインシステム</title>
+  <style>
+    /* ─────────────────────────────────────────────────────────────
+       1. TOKENS & FIBONACCI RATIOS
+       ───────────────────────────────────────────────────────────── */
+    :root {
+      /* Fibonacci Spacing */
+      --sp-1: 1px;
+      --sp-2: 2px;
+      --sp-3: 3px;
+      --sp-5: 5px;
+      --sp-8: 8px;
+      --sp-13: 13px;
+      --sp-21: 21px;
+      --sp-34: 34px;
+      --sp-55: 55px;
+      --sp-89: 89px;
+      --sp-144: 144px;
+
+      /* Fibonacci Typography Scale */
+      --fs-xs: 13px;
+      --fs-base: 16px;
+      --fs-md: 21px;
+      --fs-lg: 34px;
+      --fs-xl: 55px;
+
+      /* Monotone Palette (墨・紙・階層グレー) */
+      --bg-body: #F5F4EF;        /* 静かな和紙色 */
+      --bg-surface: #FFFFFF;     /* 純白の舞台 */
+      --bg-surface-dim: #ECE9DF; /* 静寂Dim時の背景 */
+      --bg-subtle: #ECE9DF;      /* 薄灰 */
+      --text-sumi: #181818;      /* 墨黒 */
+      --text-secondary: #4A4A4A;
+      --text-muted: #828282;
+
+      /* Traditional Single Accent Colors */
+      --accent-vermilion: #D9381E; /* 朱: 捺印・主決断・危険 */
+      --accent-vermilion-hover: #BA2A12;
+      --accent-indigo: #1E3A8A;    /* 藍: 静謐・知性 */
+      --accent-indigo-hover: #172554;
+      --accent-gold: #C5A059;      /* 金/真鍮: 格調・永続 */
+      --accent-gold-hover: #A6833E;
+
+      /* Dynamic Accent (Default: Vermilion) */
+      --accent: var(--accent-vermilion);
+      --accent-hover: var(--accent-vermilion-hover);
+      --accent-contrast: #FFFFFF;
+
+      /* Radius */
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 13px;
+
+      /* Shadows (線に頼らない、面の微細な重なり) */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 21px 55px rgba(0, 0, 0, 0.07);
+
+      --font-serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+      --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+    }
+
+    [data-accent="indigo"] {
+      --accent: var(--accent-indigo);
+      --accent-hover: var(--accent-indigo-hover);
+    }
+    [data-accent="gold"] {
+      --accent: var(--accent-gold);
+      --accent-hover: var(--accent-gold-hover);
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       2. BASE RESET & BORDERLESS PHILOSOPHY
+       ───────────────────────────────────────────────────────────── */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-sumi);
+      font-family: var(--font-sans);
+      font-size: var(--fs-base);
+      line-height: 1.618;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.02em;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 var(--sp-21);
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       3. TOP NAVIGATION (NO BORDER, PURE BLUR)
+       ───────────────────────────────────────────────────────────── */
+    .nav {
+      background: rgba(245, 244, 239, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: var(--sp-55);
+      padding: var(--sp-8) 0;
+      gap: var(--sp-13);
+    }
+    .nav-brand {
+      font-family: var(--font-serif);
+      font-size: var(--fs-md);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-8);
+      min-width: 0;
+    }
+    .nav-brand-seal {
+      display: inline-block;
+      width: 13px;
+      height: 13px;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: background 0.3s ease;
+      flex-shrink: 0;
+    }
+    .accent-switcher {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-8);
+      font-size: var(--fs-xs);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .accent-btn {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      min-height: 24px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .accent-btn:hover {
+      transform: scale(1.18);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+    .accent-btn.vermilion { background: var(--accent-vermilion); }
+    .accent-btn.indigo { background: var(--accent-indigo); }
+    .accent-btn.gold { background: var(--accent-gold); }
+
+    /* ─────────────────────────────────────────────────────────────
+       4. HERO SECTION (SPACING INSTEAD OF LINES)
+       ───────────────────────────────────────────────────────────── */
+    .hero {
+      padding: var(--sp-89) 0 var(--sp-55);
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-5);
+      font-size: var(--fs-xs);
+      font-family: var(--font-mono);
+      padding: var(--sp-5) var(--sp-13);
+      background: var(--bg-subtle);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--sp-21);
+      color: var(--text-secondary);
+    }
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(22px, 5.5vw, var(--fs-xl));
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--sp-21);
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+    .hero-title span {
+      background: linear-gradient(transparent 65%, rgba(217, 56, 30, 0.18) 65%);
+      padding: 0;
+      transition: background 0.3s ease;
+    }
+    .hero-lead {
+      font-size: var(--fs-md);
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       5. SECTIONS & BORDERLESS CARDS
+       ───────────────────────────────────────────────────────────── */
+    .section {
+      padding: var(--sp-55) 0 var(--sp-89);
+    }
+    .section-header {
+      margin-bottom: var(--sp-34);
+    }
+    .section-tag {
+      font-size: var(--fs-xs);
+      font-family: var(--font-mono);
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--sp-5);
+      transition: color 0.3s ease;
+    }
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: var(--fs-lg);
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: var(--sp-21);
+    }
+    .card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      padding: var(--sp-34) var(--sp-21);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+    .card-num {
+      font-family: var(--font-mono);
+      font-size: var(--fs-xs);
+      color: var(--text-muted);
+      margin-bottom: var(--sp-8);
+      font-weight: 600;
+    }
+    .card-title {
+      font-family: var(--font-serif);
+      font-size: var(--fs-md);
+      font-weight: 700;
+      margin-bottom: var(--sp-8);
+    }
+    .card-body {
+      font-size: var(--fs-base);
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       6. INTERACTIVE DEMO (BORDERLESS APP SHELL)
+       ───────────────────────────────────────────────────────────── */
+    .demo-wrapper {
+      position: relative;
+      margin-top: var(--sp-21);
+    }
+
+    /* 左右のショートカット HUD バー */
+    .hud-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--sp-8) var(--sp-21);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      background: var(--bg-subtle);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .hud-side {
+      display: flex;
+      gap: var(--sp-13);
+      align-items: center;
+    }
+    .hud-key {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #FFF;
+      border-radius: 3px;
+      font-weight: 700;
+      color: var(--text-sumi);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .demo-container {
+      background: var(--bg-surface);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      position: relative;
+      transition: background 0.4s ease;
+    }
+
+    /* DONE時の静寂Dim (明度フィルター) モード */
+    .demo-container.is-dimmed {
+      background: var(--bg-surface-dim) !important;
+    }
+    .demo-container.is-dimmed .demo-header {
+      background: rgba(0,0,0,0.03);
+      color: var(--text-secondary);
+    }
+    .demo-container.is-dimmed .demo-footer {
+      background: rgba(0,0,0,0.03);
+    }
+
+    .demo-header {
+      background: var(--bg-subtle);
+      padding: var(--sp-13) var(--sp-21);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: var(--fs-xs);
+    }
+    .demo-steps {
+      display: flex;
+      gap: var(--sp-13);
+      align-items: center;
+    }
+    .demo-step-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-5);
+      color: var(--text-muted);
+    }
+    .demo-step-badge.active {
+      color: var(--text-sumi);
+      font-weight: 700;
+    }
+    .demo-step-badge.active .step-dot {
+      background: var(--accent);
+    }
+    .step-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.15);
+      transition: background 0.3s ease;
+    }
+
+    .demo-body {
+      padding: var(--sp-34);
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    .step-pane {
+      display: none;
+    }
+    .step-pane.active {
+      display: block;
+      animation: fadeIn 0.25s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Inputs (Must-have line: 触れる場所を示す端正な1px境界) */
+    .primary-input {
+      width: 100%;
+      padding: var(--sp-13);
+      font-size: var(--fs-base);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: var(--radius-sm);
+      background: var(--bg-body);
+      color: var(--text-sumi);
+      font-family: var(--font-sans);
+      resize: vertical;
+      min-height: 90px;
+      transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .primary-input:focus {
+      outline: none;
+      background: #FFF;
+      border-color: var(--text-sumi);
+      box-shadow: 0 0 0 1px var(--text-sumi);
+    }
+
+    /* ─── ERROR & SHAKE (エラー振動 ＋ 赤Tint) ─── */
+    @keyframes linear-shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+    .is-error {
+      animation: linear-shake 0.25s ease-in-out !important;
+      background-color: rgba(217, 56, 30, 0.08) !important;
+      box-shadow: 0 0 0 2px var(--accent-vermilion) !important;
+    }
+    .error-hint {
+      display: none;
+      font-size: var(--fs-xs);
+      color: var(--accent-vermilion);
+      font-weight: 600;
+      margin-top: var(--sp-5);
+    }
+    .is-error + .error-hint {
+      display: block;
+    }
+
+    /* ─── MARCHING DOTTED FRAME (処理中 5pxドット回転点線枠) ─── */
+    .marching-frame {
+      position: relative;
+      border-radius: var(--radius-md);
+      padding: var(--sp-34) var(--sp-21);
+      text-align: center;
+      background: var(--bg-body);
+      overflow: hidden;
+    }
+    .marching-svg-border {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .marching-svg-border rect {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 4;
+      stroke-dasharray: 4 14;
+      stroke-linecap: round;
+      animation: marchDotted 1.8s linear infinite;
+    }
+    @keyframes marchDotted {
+      to {
+        stroke-dashoffset: -36;
+      }
+    }
+
+    /* ─── DONE SECTION (DIMMED BACKGROUND & FOCUSED WHITE CARD) ─── */
+    .done-card {
+      background: #FFFFFF;
+      border-radius: var(--radius-md);
+      padding: var(--sp-34) var(--sp-21);
+      box-shadow: var(--shadow-lg);
+      max-width: 520px;
+      margin: 0 auto;
+      text-align: center;
+      animation: cardFloat 0.3s ease forwards;
+    }
+    @keyframes cardFloat {
+      from { transform: translateY(6px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .done-seal-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 55px;
+      height: 55px;
+      border-radius: 4px;
+      background: var(--accent);
+      color: #FFFFFF;
+      font-size: 28px;
+      font-weight: 900;
+      font-family: var(--font-serif);
+      margin-bottom: var(--sp-13);
+      box-shadow: 0 4px 13px rgba(217, 56, 30, 0.25);
+      animation: sealStamp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes sealStamp {
+      0% { transform: scale(1.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Demo Footer */
+    .demo-footer {
+      padding: var(--sp-13) var(--sp-21);
+      background: #FAFAFA;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--sp-13);
+      transition: background 0.4s ease;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       7. BUTTONS & TOOLTIPS (BORDERLESS)
+       ───────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-8);
+      font-size: var(--fs-base);
+      font-weight: 600;
+      padding: var(--sp-8) var(--sp-21);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      min-height: 40px;
+      position: relative;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: var(--accent-contrast);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 13px rgba(0,0,0,0.18);
+    }
+    .btn-skip {
+      background: transparent;
+      color: var(--text-muted);
+      font-size: var(--fs-xs);
+    }
+    .btn-skip:hover {
+      color: var(--text-sumi);
+      background: var(--bg-subtle);
+    }
+    .btn-ghost {
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+    }
+    .btn-ghost:hover {
+      background: rgba(0,0,0,0.08);
+    }
+
+    /* ─── DANGEROUS BUTTON & HOVER WARNING TOOLTIP ─── */
+    .btn-danger {
+      background: rgba(217, 56, 30, 0.08);
+      color: var(--accent-vermilion);
+      font-size: var(--fs-xs);
+    }
+    .btn-danger:hover {
+      background: rgba(217, 56, 30, 0.15);
+    }
+    .btn-danger .warning-tooltip {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: #18181B;
+      color: #FFF;
+      font-size: 11px;
+      font-weight: normal;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 13px rgba(0,0,0,0.2);
+      z-index: 50;
+    }
+    .btn-danger .warning-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: #18181B;
+    }
+    .btn-danger:hover .warning-tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Tables (Must-have line: データの誤読を防ぐ端正な水平線) */
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--fs-xs);
+      margin-top: var(--sp-13);
+      background: var(--bg-body);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .spec-table th, .spec-table td {
+      padding: var(--sp-8) var(--sp-13);
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .spec-table th {
+      background: rgba(0, 0, 0, 0.04);
+      font-weight: 600;
+      font-family: var(--font-mono);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .code-box {
+      background: #18181B;
+      color: #E4E4E7;
+      padding: var(--sp-21);
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: var(--fs-xs);
+      line-height: 1.6;
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+    }
+    .code-box .keyword { color: #F472B6; font-weight: 700; }
+    .code-box .pass { color: #4ADE80; font-weight: 700; }
+    .code-box .comment { color: #71717A; }
+
+    /* ─────────────────────────────────────────────────────────────
+       9. RESPONSIVE (yui HEALTHY)
+       ───────────────────────────────────────────────────────────── */
+    @media (max-width: 580px) {
+      .nav-brand {
+        font-size: var(--fs-base);
+      }
+      .accent-switcher span {
+        display: none;
+      }
+      .hud-bar {
+        flex-direction: column;
+        gap: var(--sp-5);
+        align-items: flex-start;
+      }
+      .hud-side {
+        flex-wrap: wrap;
+        gap: var(--sp-8);
+      }
+      .demo-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--sp-8);
+      }
+      .demo-footer {
+        flex-direction: column-reverse;
+        gap: var(--sp-13);
+        align-items: stretch;
+      }
+      .demo-footer-right {
+        flex-direction: column;
+        width: 100%;
+        display: flex;
+        gap: var(--sp-8);
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+
+    .footer {
+      padding: var(--sp-55) 0 var(--sp-89);
+      text-align: center;
+      font-size: var(--fs-xs);
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation (Pure Blur, No Border) -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="nav-brand">
+        <span class="nav-brand-seal"></span>
+        <span>単機能・直列 デザインシステム</span>
+      </div>
+      <div class="accent-switcher">
+        <span>伝統色切替:</span>
+        <button class="accent-btn vermilion" onclick="setAccent('vermilion')" title="朱 (Vermilion)"></button>
+        <button class="accent-btn indigo" onclick="setAccent('indigo')" title="藍 (Indigo)"></button>
+        <button class="accent-btn gold" onclick="setAccent('gold')" title="金 (Gold)"></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-badge">WHY-FIRST SINGLE-PURPOSE ARCHITECTURE</div>
+        <h1 class="hero-title">
+          <span>「色々できる理由がない。」</span>
+        </h1>
+        <p class="hero-lead">
+          多機能メガツールの迷宮から、1秒で最高の手触りで終わる道具へ。<br>
+          線を削ぎ落とし、余白と面だけで境界を語るWebアプリのデザイン言語。
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 1: 3 Core Rules -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">01 / ARCHITECTURE</div>
+          <h2 class="section-title">直列遷移と三つの絶対原則</h2>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-num">RULE 01</div>
+            <h3 class="card-title">企画意図からの逆算</h3>
+            <p class="card-body">
+              「誰が・何を・どうしたいか」から画面を逆算。不要な選択肢をすべて捨て、目的達成のための最短ルート（一本道）だけを敷く。
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-num">RULE 02</div>
+            <h3 class="card-title">主要85% : 枝葉15%</h3>
+            <p class="card-body">
+              主役となる主要UIを画面中央に大胆に配置。詳細設定や過去ログは隅に息をひそめさせ、視界のノイズをゼロにする。
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-num">RULE 03</div>
+            <h3 class="card-title">直列・Skip・即完了</h3>
+            <p class="card-body">
+              UIを行ったり来たりさせない。Sane Defaults（最善の初期値）とSkipボタンで、こだわりたい箇所だけ触り、最短でDoneに届く。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Interactive Live Demo -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">02 / INTERACTIVE EXPERIENCE</div>
+          <h2 class="section-title">直列遷移・線の省略・暗転DONEの実体験</h2>
+          <p style="color: var(--text-secondary); margin-top: var(--sp-8); font-size: var(--fs-base);">
+            余計な囲み線を排した澄んだ空間で、キーバインド対応、エラー振動、回転点線枠、静寂Dimを試してください。
+          </p>
+        </div>
+
+        <div class="demo-wrapper">
+          <!-- 左右のショートカット HUD バー (Keybinding Dock) -->
+          <div class="hud-bar">
+            <div class="hud-side">
+              <span><span class="hud-key">Esc</span> 戻る</span>
+              <span><span class="hud-key">Space</span> スキップ</span>
+            </div>
+            <div class="hud-side">
+              <span><span class="hud-key">⌘+↵</span> 次へ / 完了</span>
+              <span><span class="hud-key">⌘+K</span> 原稿クリア</span>
+            </div>
+          </div>
+
+          <div class="demo-container" id="demo-box">
+            <div class="demo-header">
+              <div class="demo-steps">
+                <span class="demo-step-badge active" id="badge-1"><span class="step-dot"></span> 1. 素材投入</span>
+                <span style="color: var(--text-muted); opacity: 0.5;">─></span>
+                <span class="demo-step-badge" id="badge-2"><span class="step-dot"></span> 2. 解析・プレビュー</span>
+                <span style="color: var(--text-muted); opacity: 0.5;">─></span>
+                <span class="demo-step-badge" id="badge-3"><span class="step-dot"></span> 3. 一撃Done</span>
+              </div>
+              <span style="color: var(--text-muted);">ONE-WAY PIPELINE</span>
+            </div>
+
+            <div class="demo-body">
+              <!-- Step 1: Input -->
+              <div class="step-pane active" id="step-1">
+                <h4 style="font-family: var(--font-serif); font-size: var(--fs-md); margin-bottom: var(--sp-8);">
+                  原稿テキストを投入してください
+                </h4>
+                <p style="color: var(--text-muted); font-size: var(--fs-xs); margin-bottom: var(--sp-13);">
+                  【主要UI】迷わず放り込める大領域（※テキストを空にして「次へ」を押すとエラー振動します）
+                </p>
+                <textarea class="primary-input" id="demo-text" placeholder="ここに原稿を貼り付けます…">雪の降る夜、小さな駅の待合室には古いストーブが一つだけ置かれていた。煙突から立ち上る煙が、夜空の深い藍色に吸い込まれていく。</textarea>
+                <div class="error-hint">⚠️ 原稿テキストが入力されていません（入力してから進んでください）</div>
+
+                <div style="margin-top: var(--sp-13); display: flex; justify-content: flex-end;">
+                  <!-- Dangerous Button with Hover Warning Tooltip -->
+                  <button class="btn btn-danger" onclick="clearInput()">
+                    原稿を破棄してクリア
+                    <span class="warning-tooltip">⚠️ この操作は取り消せません（入力が全消去されます）</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Step 2: Processing (Marching Dotted Frame) & Preview -->
+              <div class="step-pane" id="step-2">
+                <!-- Sub-state A: Marching Dotted Frame (Processing) -->
+                <div id="step-2-loading" class="marching-frame">
+                  <svg class="marching-svg-border">
+                    <rect x="2" y="2" width="calc(100% - 4px)" height="calc(100% - 4px)" rx="5" ry="5"></rect>
+                  </svg>
+                  <div style="font-family: var(--font-serif); font-size: var(--fs-md); font-weight: 700; margin-bottom: var(--sp-8); color: var(--text-sumi);">
+                    墨を磨るように解析中...
+                  </div>
+                  <p style="font-size: var(--fs-xs); color: var(--text-muted);">
+                    フィボナッチ比率組版（1:1.618）と段落余白を自動計算しています
+                  </p>
+                </div>
+
+                <!-- Sub-state B: Preview Result (After 0.8s) -->
+                <div id="step-2-content" style="display: none;">
+                  <h4 style="font-family: var(--font-serif); font-size: var(--fs-md); margin-bottom: var(--sp-8);">
+                    生成プレビュー（最善値が自動適用中）
+                  </h4>
+                  <div style="background: var(--bg-body); padding: var(--sp-21); border-radius: var(--radius-sm); margin-bottom: var(--sp-13);">
+                    <div style="font-size: var(--fs-xs); color: var(--text-muted); margin-bottom: var(--sp-5);">組版結果 (フィボナッチ行間 1.618 適用済み):</div>
+                    <div id="preview-output" style="font-family: var(--font-serif); line-height: 1.8; color: var(--text-sumi); border-left: 2px solid var(--accent); padding-left: var(--sp-13);"></div>
+                  </div>
+                  <div style="font-size: var(--fs-xs); color: var(--text-muted);">
+                    ※微調整したい人だけ設定を変更できます（通常はそのまま完了へ）
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3: Done (Dimmed Background with Focused White Card) -->
+              <div class="step-pane" id="step-3">
+                <div class="done-card">
+                  <div class="done-seal-badge">印</div>
+                  <h4 style="font-family: var(--font-serif); font-size: var(--fs-lg); margin-bottom: var(--sp-8); color: var(--text-sumi); letter-spacing: 0.05em;">
+                    組 版 完 了
+                  </h4>
+                  <p style="color: var(--text-secondary); font-size: var(--fs-base); margin-bottom: var(--sp-21);">
+                    画面の明度がすっと一段落ち着き、成果物にスポットライトが当たります。
+                  </p>
+                  <button class="btn btn-primary" onclick="alert('成果物（PDF/データ）をダウンロードしました！')">
+                    成果物をダウンロード (⌘+S)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="demo-footer">
+              <button class="btn btn-ghost" id="btn-prev" onclick="prevStep()" style="visibility: hidden;">
+                ← 戻る (Esc)
+              </button>
+              <div class="demo-footer-right" style="display: flex; gap: var(--sp-13); align-items: center;">
+                <button class="btn btn-skip" id="btn-skip" onclick="skipToDone()">
+                  スキップして即完了 (Space)
+                </button>
+                <button class="btn btn-primary" id="btn-next" onclick="nextStep()">
+                  次へ進む (⌘+↵)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Physical & Visual Feedback Rules -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">03 / SUBTRACTION & SENSES</div>
+          <h2 class="section-title">線の省略と五感のフィードバック</h2>
+          <p style="color: var(--text-secondary); margin-top: var(--sp-8); font-size: var(--fs-base);">
+            線を消すことで、余白と面が呼吸し、意味のある色と動きだけが際立つ。
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-num">LESSON 01</div>
+            <h3 class="card-title">線の省略（Border-Free）</h3>
+            <p class="card-body">
+              囲み線と区切り線をすべて撤廃。背景の白と和紙色のコントラスト、フィボナッチ余白だけで境界を語る。
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-num">LESSON 02</div>
+            <h3 class="card-title">エラー振動 ＋ 5pxドット枠</h3>
+            <p class="card-body">
+              小難しい文章を排し、要素自体の微細シェイクと赤Tint、そして静かに周回する5pxドット枠で状態を直感させる。
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-num">LESSON 03</div>
+            <h3 class="card-title">静寂Dim ＋ 左右HUD</h3>
+            <p class="card-body">
+              完了時に背景の明度が一段落ちて落款が灯る。左右のHUDが、キーボード1本で1秒完走する道具性を保証する。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Fibonacci Specs -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">04 / FIBONACCI RATIOS</div>
+          <h2 class="section-title">フィボナッチ比率と伝統色の秩序</h2>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-21);">
+          <div class="card">
+            <h3 class="card-title">黄金余白スケール</h3>
+            <p class="card-body" style="margin-bottom: var(--sp-13);">
+              余白・フォントサイズをすべて自然界の調和（Fibonacci）で律し、線がなくても崩れないリズムを保ちます。
+            </p>
+            <table class="spec-table">
+              <tr><th>段階</th><th>値</th><th>用途</th></tr>
+              <tr><td><code>sp-8</code></td><td>8px</td><td>極小の間合い・バッジ内部</td></tr>
+              <tr><td><code>sp-13</code></td><td>13px</td><td>インプット内余白・注記</td></tr>
+              <tr><td><code>sp-21</code></td><td>21px</td><td>カード内余白・小見出し</td></tr>
+              <tr><td><code>sp-34</code></td><td>34px</td><td>セクション間隔・中見出し</td></tr>
+              <tr><td><code>sp-55</code></td><td>55px</td><td>大区分・大見出し</td></tr>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">原則一色の伝統色</h3>
+            <p class="card-body" style="margin-bottom: var(--sp-13);">
+              画面に多色を散らさず、主動線だけに1色を差すことで、視線を0.1秒で誘導します。
+            </p>
+            <div style="display: flex; flex-direction: column; gap: var(--sp-8);">
+              <div style="display: flex; align-items: center; gap: var(--sp-13); padding: var(--sp-8); background: var(--bg-body); border-radius: var(--radius-sm);">
+                <div style="width: 24px; height: 24px; border-radius: 4px; background: var(--accent-vermilion);"></div>
+                <div>
+                  <div style="font-weight: 700; font-size: var(--fs-xs);">朱 (Vermilion / #D9381E)</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">捺印・一撃の決断・最重要アクション</div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: var(--sp-13); padding: var(--sp-8); background: var(--bg-body); border-radius: var(--radius-sm);">
+                <div style="width: 24px; height: 24px; border-radius: 4px; background: var(--accent-indigo);"></div>
+                <div>
+                  <div style="font-weight: 700; font-size: var(--fs-xs);">藍 (Indigo / #1E3A8A)</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">知的作業・静謐・構造・信頼</div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: var(--sp-13); padding: var(--sp-8); background: var(--bg-body); border-radius: var(--radius-sm);">
+                <div style="width: 24px; height: 24px; border-radius: 4px; background: var(--accent-gold);"></div>
+                <div>
+                  <div style="font-weight: 700; font-size: var(--fs-xs);">金・真鍮 (Gold / #C5A059)</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">格調・永続・完成・ハイライト</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Natural Language E2E Snowball -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">05 / EVIDENCE & QUALITY</div>
+          <h2 class="section-title">自然言語 E2E Snowball（仕様 ＝ 検証）</h2>
+          <p style="color: var(--text-secondary); margin-top: var(--sp-8); font-size: var(--fs-base);">
+            コードの手書きテストではなく、ユーザーの成功ストーリーをそのままテストとして蓄積・実行。
+          </p>
+        </div>
+
+        <div class="code-box">
+<span class="comment"># specs.scenario.md (自然言語 Snowball テストスイート)</span>
+
+<span class="keyword">## 01. 線の省略と最速スキップ完走</span>
+1. 画面を開いたとき、無駄な囲み線がなく、余白と面で整理されていること
+2. 「吾輩は猫である」と入力する
+3. 「スキップして即完了」ボタンをクリックする
+4. <span class="pass">[PASS]</span> 画面が静かにDimし、純白カードと落款が表示されること <span class="comment">(yui: 0 issues)</span>
+
+<span class="keyword">## 02. エラー振動とインライン修正</span>
+1. テキストを空にする
+2. 「次へ進む」をクリックする
+3. <span class="pass">[PASS]</span> 入力欄が微細振動し、赤Tintが灯り、画面遷移がブロックされること
+4. テキストを再入力すると赤Tintが消えること
+
+<span class="keyword">## 03. キーボード完走</span>
+1. `Cmd+Enter` を押すと次へ進み、`Esc` で戻れること
+2. 左右の HUD にキーバインドが常時表示されていること
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p style="font-family: var(--font-serif); font-size: var(--fs-base); margin-bottom: var(--sp-8);">
+        単機能・直列Webアプリ デザインシステム
+      </p>
+      <p>Why-First Architecture &bull; Borderless &bull; Fibonacci &bull; Natural Language Snowball E2E</p>
+    </div>
+  </footer>
+
+  <script>
+    // Theme Accent Switcher
+    function setAccent(color) {
+      document.documentElement.setAttribute('data-accent', color);
+    }
+
+    // Linear Demo Controller
+    let currentStep = 1;
+    const totalSteps = 3;
+
+    function updateStepUI() {
+      const demoBox = document.getElementById('demo-box');
+
+      // Panes
+      document.querySelectorAll('.step-pane').forEach((el, idx) => {
+        el.classList.toggle('active', idx + 1 === currentStep);
+      });
+
+      // Badges
+      for (let i = 1; i <= totalSteps; i++) {
+        const badge = document.getElementById(`badge-${i}`);
+        if (badge) badge.classList.toggle('active', i === currentStep);
+      }
+
+      // Prev Button
+      const btnPrev = document.getElementById('btn-prev');
+      btnPrev.style.visibility = currentStep > 1 ? 'visible' : 'hidden';
+
+      // Next / Skip Buttons
+      const btnNext = document.getElementById('btn-next');
+      const btnSkip = document.getElementById('btn-skip');
+
+      if (currentStep === 1) {
+        demoBox.classList.remove('is-dimmed');
+        btnNext.textContent = '次へ進む (⌘+↵)';
+        btnSkip.style.display = 'inline-flex';
+      } else if (currentStep === 2) {
+        demoBox.classList.remove('is-dimmed');
+        btnNext.textContent = '完了画面へ (⌘+↵)';
+        btnSkip.style.display = 'inline-flex';
+
+        // Trigger Marching Dots Loading -> Preview Transition
+        const loadingEl = document.getElementById('step-2-loading');
+        const contentEl = document.getElementById('step-2-content');
+        loadingEl.style.display = 'block';
+        contentEl.style.display = 'none';
+
+        setTimeout(() => {
+          loadingEl.style.display = 'none';
+          contentEl.style.display = 'block';
+          const text = document.getElementById('demo-text').value || '（未入力）';
+          document.getElementById('preview-output').textContent = text;
+        }, 800);
+      } else if (currentStep === 3) {
+        // DONE: Dim background
+        demoBox.classList.add('is-dimmed');
+        btnNext.textContent = '最初からやり直す';
+        btnSkip.style.display = 'none';
+      }
+    }
+
+    function nextStep() {
+      if (currentStep === 1) {
+        const textInput = document.getElementById('demo-text');
+        if (!textInput.value.trim()) {
+          // Trigger Shake & Red Tint
+          textInput.classList.remove('is-error');
+          void textInput.offsetWidth; // force reflow
+          textInput.classList.add('is-error');
+          return;
+        } else {
+          textInput.classList.remove('is-error');
+        }
+      }
+
+      if (currentStep < totalSteps) {
+        currentStep++;
+      } else {
+        currentStep = 1;
+      }
+      updateStepUI();
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        updateStepUI();
+      }
+    }
+
+    function skipToDone() {
+      const textInput = document.getElementById('demo-text');
+      if (!textInput.value.trim()) {
+        textInput.classList.remove('is-error');
+        void textInput.offsetWidth;
+        textInput.classList.add('is-error');
+        return;
+      }
+      currentStep = 3;
+      updateStepUI();
+    }
+
+    function clearInput() {
+      const textInput = document.getElementById('demo-text');
+      textInput.value = '';
+      textInput.focus();
+    }
+
+    // Clear error class on typing
+    document.getElementById('demo-text').addEventListener('input', function() {
+      if (this.value.trim()) {
+        this.classList.remove('is-error');
+      }
+    });
+
+    // Keyboard Shortcuts (Cmd+Enter, Esc, Space)
+    window.addEventListener('keydown', function(e) {
+      const isTextarea = document.activeElement && document.activeElement.tagName === 'TEXTAREA';
+
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        nextStep();
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        clearInput();
+      } else if (e.key === 'Escape' && currentStep > 1) {
+        e.preventDefault();
+        prevStep();
+      } else if (e.key === ' ' && !isTextarea && currentStep < 3) {
+        e.preventDefault();
+        skipToDone();
+      }
+    });
+  </script>
+</body>
+</html>

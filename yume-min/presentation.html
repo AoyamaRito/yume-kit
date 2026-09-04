@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>yume-min — 単一作者の透明編集コア</title>
+<style>
+  :root {
+    --bg:      #0e131a;
+    --panel:   #151c26;
+    --panel2:  #1a2330;
+    --line:    #243040;
+    --text:    #e8eef6;
+    --muted:   #8fa1b8;
+    --accent:  #7fb2d9;
+    --accent2: #4f7ea6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); overflow: hidden; }
+  body { font-family: "Hiragino Sans", "Helvetica Neue", Arial, sans-serif; color: var(--text); }
+
+  /* ---- slide stage ---- */
+  #stage { position: fixed; inset: 0; }
+  .slide {
+    position: absolute; inset: 0; padding: 9vh 9vw;
+    display: flex; flex-direction: column; justify-content: center;
+    opacity: 0; transform: translateX(24px); transition: opacity .35s, transform .35s; pointer-events: none;
+  }
+  .slide.current { opacity: 1; transform: none; pointer-events: auto; }
+
+  /* ---- typography ---- */
+  h1 { font-size: clamp(34px, 6vw, 72px); font-weight: 700; letter-spacing: .04em; }
+  h2 { font-size: clamp(24px, 3.6vw, 44px); font-weight: 600; letter-spacing: .02em; margin-bottom: 4px; }
+  .kicker { color: var(--accent); font-size: clamp(12px, 1.5vw, 16px); letter-spacing: .35em; margin-bottom: 18px; }
+  .sub { color: var(--muted); font-size: clamp(15px, 1.9vw, 21px); line-height: 1.9; }
+  .lead { color: var(--text); font-size: clamp(18px, 2.4vw, 28px); font-weight: 500; line-height: 1.8; margin-top: 22px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; margin-top: 44px; }
+  .grid.two { grid-template-columns: 1fr 1fr; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 26px 24px;
+  }
+  .card .n { color: var(--accent); font-size: 13px; letter-spacing: .2em; margin-bottom: 10px; font-weight: 600; }
+  .card h3 { font-size: 18px; margin-bottom: 10px; }
+  .card p { color: var(--muted); font-size: 14.5px; line-height: 1.75; }
+
+  blockquote {
+    margin: 34px 0 0; padding-left: 18px; border-left: 3px solid var(--accent2);
+    color: var(--text); font-size: clamp(17px, 2.2vw, 26px); line-height: 2; font-weight: 500;
+  }
+
+  pre {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 24px; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13.5px; line-height: 1.7; color: #cfe0f2; overflow-x: auto; margin-top: 30px;
+  }
+  pre .c { color: #5a6c84; }
+  table { width: 100%; border-collapse: collapse; margin-top: 36px; font-size: 15px; }
+  th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  th { color: var(--accent); font-weight: 600; letter-spacing: .04em; font-size: 13px; }
+  td { color: var(--muted); }
+  td b { color: var(--text); }
+
+  /* ---- flow markers ---- */
+  .flow { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 56px; flex-wrap: wrap; }
+  .fstep { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; text-align: center; min-width: 132px; }
+  .fstep .t { color: var(--accent); font-size: 12px; letter-spacing: .18em; }
+  .fstep .d { color: var(--text); font-size: 14px; margin-top: 6px; }
+  .farrow { color: var(--accent2); font-size: 20px; }
+
+  /* ---- nav ---- */
+  #nav { position: fixed; bottom: 22px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 18px; z-index: 10; }
+  #dots { display: flex; gap: 8px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); cursor: pointer; border: none; transition: background .2s, transform .2s; }
+  .dot.on { background: var(--accent); transform: scale(1.25); }
+  #counter { color: var(--muted); font-size: 12px; letter-spacing: .12em; position: fixed; bottom: 22px; right: 28px; z-index: 10; }
+  .arrow { position: fixed; top: 50%; transform: translateY(-50%); z-index: 12; background: none; border: none; color: var(--accent2); font-size: 40px; cursor: pointer; opacity: .5; transition: opacity .2s; }
+  .arrow:hover { opacity: 1; }
+  #prev { left: 18px; } #next { right: 18px; }
+  .tag { position: fixed; top: 20px; left: 28px; color: var(--muted); font-size: 12px; letter-spacing: .25em; z-index: 10; }
+  .section { position: fixed; top: 20px; right: 28px; color: var(--accent); font-size: 12px; letter-spacing: .25em; z-index: 10; }
+  @media print { .arrow, #nav, .tag, .section { display:none; } .slide { position: relative; inset:auto; opacity:1; transform:none; page-break-after:always; height:auto; overflow:visible; } body{overflow:visible; height:auto;} }
+</style>
+</head>
+<body>
+
+<div class="tag">yume-min</div>
+<div class="section" id="sectionLabel">概要</div>
+
+<div id="stage">
+
+  <!-- ============ 概要 3 pages ============ -->
+  <section class="slide">
+    <div class="kicker">AI-FIRST · 最小の透明編集コア</div>
+    <h1>yume-min</h1>
+    <div class="sub" style="margin-top:20px;">AIがコードを「読んで・編集して・履歴を残す」ための最小実装。<br/>1ファイル一気読みできる、けずり切ったコア。</div>
+    <blockquote>「AIは建築家であり、人間は監督である。」—— V4.3</blockquote>
+    <div class="lead" style="color:var(--muted); font-size:15px; margin-top:44px;">Total 737行（core.jsはわずか218行）／ テスト 31件全グリーン</div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">WHY — なぜいま、これを</div>
+    <h2>つくった理由</h2>
+    <div class="grid">
+      <div class="card"><div class="n">01</div><h3>AIはgitの履歴を見られない</h3><p>履歴は.gitの中にあって、ファイルを開いただけでは見えない。AIには「今の内容」しか残らない。→ 履歴を平文でファイルに内蔵する。</p></div>
+      <div class="card"><div class="n">02</div><h3>並列は品質を下げる</h3><p>1つの状態を複数AIで分けると、名前・構造の一貫性が失われ、それを補修する装置が更に複雑さを招く。</p></div>
+      <div class="card"><div class="n">03</div><h3>激安AIなら単一で十分</h3><p>1体を延々回してもコストは気にならない。並列の「スピード」という報酬はもう要らない。</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">OVERVIEW — しくみの全体像</div>
+    <h2>1つのループが全て</h2>
+    <div class="flow">
+      <div class="fstep"><div class="t">LIFT</div><div class="d">実コード→Block<br/>(全言語)</div></div><div class="farrow">→</div>
+      <div class="fstep"><div class="t">正本Graph</div><div class="d">append-only<br/>履歴内蔵</div></div><div class="farrow">→</div>
+      <div class="fstep"><div class="t">EDIT</div><div class="d">expand して編集</div></div><div class="farrow">→</div>
+      <div class="fstep"><div class="t">APPLY</div><div class="d">新版をappend</div></div><div class="farrow">→</div>
+      <div class="fstep"><div class="t">RENDER</div><div class="d">実ファイルへ</div></div>
+    </div>
+    <div class="flow" style="margin-top:24px;">
+      <div class="fstep"><div class="t">PERSIST</div><div class="d">平文で保存<br/>(git不要)</div></div><div class="farrow">＋</div>
+      <div class="fstep"><div class="t">COVER</div><div class="d">検証の目<br/>(未実行区間)</div></div>
+    </div>
+    <div class="lead" style="margin-top:34px;">状態は積み上げ（append）だけ。書き直し（Scrap&Build）がいつでも安全。</div>
+  </section>
+
+  <!-- ============ 詳細 7 pages ============ -->
+  <section class="slide">
+    <div class="kicker">DETAIL — 不変項</div>
+    <h2>軌跡から抽出した「6つの不変項」</h2>
+    <p class="sub" style="margin-top:14px;">V4.3 → V9.4 → ai-desk → yume-develop → yume-lite という長期の軌跡で、最後まで生き残った価値だけを継承。</p>
+    <table>
+      <tr><th>不変項</th><th>内容</th><th>yume-min での実装</th></tr>
+      <tr><td>透明性</td><td>AIに見えない状態はハルシネーションの源泉</td><td><b>Block</b>（ダンプ可能な履歴）</td></tr>
+      <tr><td>自己記述</td><td>意味はトークン自体にある</td><td><b>domainTag</b>（`usd:1299`）</td></tr>
+      <tr><td>スナイパー読解</td><td>最初から全部読ませない</td><td><b>skeleton / getSurface</b></td></tr>
+      <tr><td>局所性</td><td>文脈を分断しない</td><td><b>expand/apply</b> のマーカー境界</td></tr>
+      <tr><td>ヘッドレス検証</td><td>人無しで正しさを担保</td><td><b>cover.js</b>（カバレッジの目）</td></tr>
+      <tr><td>Scrap&Build</td><td>積み上げで、書き直しを恐れない</td><td><b>apply は新版をappend</b></td></tr>
+    </table>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">DETAIL — コア設計</div>
+    <h2>Block / expand / apply</h2>
+    <div class="grid two">
+      <div class="card"><div class="n">Block</div><h3>実体 + 履歴</h3><p>id / type / versions[]。append-only で直近32版キャップ。content は head から派生（= 状態は1本）。</p></div>
+      <div class="card"><div class="n">apply の安全</div><h3>ヘッダ整合 + 原子性</h3><p>hash境界の改ざん・ID不一致を検知してアトミックに拒否。本文だけを安全に戻す。</p></div>
+    </div>
+    <pre>// >>> BLOCK mod:fn:add type=function hash=abcdef12
+<span class="c">// …… 本文 ……</span>
+function add(a, b) { return a + b; }
+// &lt;&lt;&lt; /BLOCK mod:fn:add hash=abcdef12</pre>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">DETAIL — 全語言語の往復</div>
+    <h2>lift.js — エンブレム方式</h2>
+    <p class="sub" style="margin-top:14px;">言語パーサ（JS限定）は持たない。マーカーはコメント行だから、<b>どの言語でも同じ境界</b>が使える。</p>
+    <div class="grid two">
+      <div class="card"><div class="n">JS</div><h3>// マーカー</h3><p><span style="font-family:monospace">// >>> BLOCK … 本文 … // &lt;&lt;&lt; /BLOCK</span></p></div>
+      <div class="card"><div class="n">Python</div><h3># マーカー</h3><p><span style="font-family:monospace"># >>> BLOCK … 本文 … # &lt;&lt;&lt; /BLOCK</span></p></div>
+    </div>
+    <pre>const { graph, spans } = lift(src);        <span class="c">// 実ファイル → 正本Graph</span>
+const view  = expand(graph, root);          <span class="c">// 単一AIが厚ビューで編集</span>
+apply(graph, root, edited);                 <span class="c">// 新バージョンを append</span>
+const out   = render(src, graph, spans);    <span class="c">// 更新した本文で実ファイルを再構築</span></pre>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">DETAIL — 平文履歴</div>
+    <h2>persist.js — git に頼らない</h2>
+    <p class="sub" style="margin-top:14px;">人間はAIにgitの権限を渡さないことが多く、gitは気軽に扱うものでもない。<br/>→ 履歴込みのGraphを<b>平文 JSON</b>として保存。そのままgrep / AIが読める。</p>
+    <div class="grid two">
+      <div class="card"><div class="n">保存</div><h3>save(graph, file)</h3><p>versions（直近32版）を含む平文JSONを出力。git操作ゼロ。</p></div>
+      <div class="card"><div class="n">復元</div><h3>load(file)</h3><p>最新版だけでなく<b>過去版</b>もそのまま復元できる。</p></div>
+    </div>
+    <blockquote>「今の内容」は残っても「なぜこうなったか」が失われる問題を、ファイル形式側で防ぐ。</blockquote>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">DETAIL — 検証の目</div>
+    <h2>cover.js — ホワイトボックスの目</h2>
+    <p class="sub" style="margin-top:14px;">単一AIが長時間まわすとき、「テストは通った」だけでは足りない。<b>「どの行がまだ実行されていないか」</b>まで見えるべき。</p>
+    <div class="grid two">
+      <div class="card"><div class="n">実行</div><h3>runWithCoverage(fn, url)</h3><p>V8精密カバレッジで対象ファイルの関数/区間を収集。</p></div>
+      <div class="card"><div class="n">指摘</div><h3>analyzeCoverageGaps(fn, src)</h3><p>実行されなかった「意味のある区間」だけをgapsとして抽出。</p></div>
+    </div>
+    <blockquote>e2eの「ついでに育てる」を、自動で穴を指摘する形に強化する。</blockquote>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">DETAIL — けずったもの</div>
+    <h2>「なにを積まないか」こそ本質</h2>
+    <table>
+      <tr><th>切った装置</th><th>切った理由</th></tr>
+      <tr><td>並列化（YVCP / v00x / 契約キー）</td><td>軌跡の根っこに無い。単一激安AIに不要。品質を下げる</td></tr>
+      <tr><td>stale-write 検知</td><td>並行変更の上書き防止＝並列前提のガード。単一作者に無用</td></tr>
+      <tr><td>言語パーサ（parseJS等）</td><td>JS限定・重い・構造をファイルから引き剥がす</td></tr>
+      <tr><td>makeThickEdit/applyThickEdit</td><td>remote/並列の通信素管。単一コアに不要</td></tr>
+      <tr><td>crystallize / go-kernel</td><td>別方向の重装備。ネイティブ化はオーバーキル</td></tr>
+    </table>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">DETAIL — 完成検証</div>
+    <h2>動くことの証明</h2>
+    <pre>node test.js   →   31 passed, 0 failed</pre>
+    <table>
+      <tr><th>検証項目</th><th>状態</th></tr>
+      <tr><td>expand → apply の safe 往復 / ヘッダ改ざん拒否</td><td><b>✓</b></td></tr>
+      <tr><td>JS・Python 両方の lift → edit → render（shell保持）</td><td><b>✓</b></td></tr>
+      <tr><td>gitなし平文履歴の save/load（過去版復元）</td><td><b>✓</b></td></tr>
+      <tr><td>未実行の関数本体を gaps として検出</td><td><b>✓</b></td></tr>
+      <tr><td>並列ガード無しでも単一作者は何も衝突しない</td><td><b>✓</b></td></tr>
+    </table>
+    <div class="lead" style="margin-top:30px;">けずって最小に。でも不変項は全部継承。それが yume-min。</div>
+  </section>
+
+</div>
+
+<button class="arrow" id="prev">‹</button>
+<button class="arrow" id="next">›</button>
+<div id="counter">1 / 10</div>
+<div id="nav"><div id="dots"></div></div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const sectionNames = ['概要','概要','概要','詳細','詳細','詳細','詳細','詳細','詳細','詳細'];
+  const dotsBox = document.getElementById('dots');
+  let i = 0;
+  sectionNames.forEach((_, k) => {
+    const d = document.createElement('button'); d.className = 'dot'; d.onclick = () => go(k); dotsBox.appendChild(d);
+  });
+  const dots = Array.from(dotsBox.children);
+  function go(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,k)=>s.classList.toggle('current', k===i));
+    dots.forEach((d,k)=>d.classList.toggle('on', k===i));
+    document.getElementById('counter').textContent = (i+1)+' / '+slides.length;
+    document.getElementById('sectionLabel').textContent = sectionNames[i];
+  }
+  document.getElementById('prev').onclick = () => go(i-1);
+  document.getElementById('next').onclick = () => go(i+1);
+  window.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') go(i+1);
+    if (e.key === 'ArrowLeft') go(i-1);
+  });
+  go(0);
+</script>
+</body>
+</html>

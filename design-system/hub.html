@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Design System — Local Hub</title>
+  <style>
+    :root {
+      --bg: #0A1C3A;
+      --panel: #0f2744;
+      --ink: #e8eef7;
+      --muted: #9aabbf;
+      --gold: #B89F5F;
+      --orange: #E85D04;
+      --line: rgba(255,255,255,.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      padding: 28px 32px 22px;
+    }
+    header .kicker {
+      font-size: 11px;
+      letter-spacing: .28em;
+      color: var(--orange);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    h1 { font-size: 28px; font-weight: 700; letter-spacing: .02em; }
+    header p { color: var(--muted); margin-top: 8px; max-width: 52em; font-size: 14px; }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 32px 64px;
+      display: grid;
+      gap: 22px;
+    }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 20px 22px;
+    }
+    section h2 {
+      font-size: 12px;
+      letter-spacing: .22em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    a.card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: rgba(0,0,0,.15);
+      transition: border-color .15s, transform .15s;
+    }
+    a.card:hover {
+      border-color: var(--gold);
+      transform: translateY(-1px);
+    }
+    a.card strong { display: block; font-size: 15px; margin-bottom: 4px; }
+    a.card span { display: block; font-size: 12px; color: var(--muted); }
+    ul.plain { list-style: none; display: grid; gap: 8px; }
+    ul.plain a {
+      color: #cfe0ff;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+    ul.plain a:hover { border-bottom-color: var(--gold); color: #fff; }
+    .note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    code {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: .9em;
+      background: rgba(0,0,0,.3);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 32px 40px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="kicker">Local only · offline</div>
+    <h1>デザインシステム — ローカルハブ</h1>
+    <p>
+      ネット不要。このフォルダ内のルール・トークン・外部要約を辿る入口。
+      相対パスのみ。ファイルを直接開いても、簡易サーバでも可。
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>クイック入口</h2>
+      <div class="grid">
+        <a class="card" href="kazari-studio/index.html" style="border-color: var(--orange); background: rgba(232, 93, 4, 0.1);">
+          <strong style="color: #FFB37C;">🖋️ 飾り文字工房 (Kazari Studio)</strong>
+          <span>単機能・直列 飾り文字生成システム</span>
+        </a>
+        <a class="card" href="PHILOSOPHY.md">
+          <strong>PHILOSOPHY.md</strong>
+          <span>★正本: デザインシステム思想録</span>
+        </a>
+        <a class="card" href="linear-design-system-lp.html">
+          <strong>単機能・直列 DS 解説LP</strong>
+          <span>動く直列デモ・伝統色切替付き</span>
+        </a>
+        <a class="card" href="DESIGN_RULES.html">
+          <strong>14U ルールブック</strong>
+          <span>グリッド・色・余白の HTML 正本</span>
+        </a>
+        <a class="card" href="design-lecture.html">
+          <strong>デザイン講義</strong>
+          <span>情報の整理 — スライドデッキ</span>
+        </a>
+        <a class="card" href="14u-fullscreen-grid.html">
+          <strong>14U グリッドデモ</strong>
+          <span>フルスクリーン格子</span>
+        </a>
+        <a class="card" href="14u-grid-cards.html">
+          <strong>14U カードデモ</strong>
+          <span>カード配置</span>
+        </a>
+        <a class="card" href="INDEX.md">
+          <strong>INDEX.md</strong>
+          <span>全文テキスト索引</span>
+        </a>
+        <a class="card" href="README.md">
+          <strong>README.md</strong>
+          <span>フォルダの使い方</span>
+        </a>
+        <a class="card" href="tokens-preview.html">
+          <strong>色見本</strong>
+          <span>全系統トークンを視覚比較</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>ローカル・システム解説（systems/）</h2>
+      <div class="grid">
+        <a class="card" href="systems/14u.md"><strong>14U</strong><span>営業プレゼン・暗系グリッド</span></a>
+        <a class="card" href="systems/kikaku.md"><strong>kikaku</strong><span>PuttyCrayme ライト高コントラスト</span></a>
+        <a class="card" href="systems/freebullet.md"><strong>freebullet</strong><span>LP・空色×青</span></a>
+        <a class="card" href="systems/srd.md"><strong>SRD</strong><span>A3 Fibonacci 印刷</span></a>
+        <a class="card" href="systems/hudeato.md"><strong>hudeato</strong><span>縦書き UI・和モダン計画</span></a>
+        <a class="card" href="systems/lecture.md"><strong>lecture</strong><span>講義の骨格</span></a>
+        <a class="card" href="systems/illustration-jitsu.md"><strong>illustration</strong><span>実況カードイラスト</span></a>
+      </div>
+      <p class="note">.md はブラウザによって素のテキスト表示になります。VS Code / Cursor で開くのが読みやすいです。</p>
+    </section>
+
+    <section>
+      <h2>トークン CSS（tokens/）— コピペ用</h2>
+      <div class="grid">
+        <a class="card" href="tokens/14u.css"><strong>14u.css</strong><span>navy / gold / orange</span></a>
+        <a class="card" href="tokens/kikaku.css"><strong>kikaku.css</strong><span>accent #1E40AF</span></a>
+        <a class="card" href="tokens/freebullet.css"><strong>freebullet.css</strong><span>sky / blue</span></a>
+        <a class="card" href="tokens/srd.css"><strong>srd.css</strong><span>Fibonacci sp/fs</span></a>
+        <a class="card" href="tokens/hudeato.css"><strong>hudeato.css</strong><span>current + V3 washi</span></a>
+        <a class="card" href="tokens/all.css"><strong>all.css</strong><span>import メモ</span></a>
+      </div>
+    </section>
+
+    <section>
+      <h2>フォント収集（fonts/）</h2>
+      <div class="grid">
+        <a class="card" href="font-hub.html" style="border-color: var(--orange); background: rgba(232, 93, 4, 0.1);">
+          <strong style="color: #FFB37C;">🔤 フォント試し打ち &amp; ライセンス台帳</strong>
+          <span>自動生成カタログ。fonts/ に入れたフォントをその場で試せる</span>
+        </a>
+        <a class="card" href="fonts/README.md"><strong>fonts/ README</strong><span>収集の手順・安全な入手元・ライセンス規約</span></a>
+        <a class="card" href="tokens/fonts.css"><strong>tokens/fonts.css</strong><span>@font-face + CSS変数（自動生成）</span></a>
+        <a class="card" href="fonts/fonts.json"><strong>fonts.json</strong><span>メタデータ（ファミリー・ウェイト・ライセンス）</span></a>
+        <a class="card" href="fonts/LICENSES.md"><strong>LICENSES.md</strong><span>ライセンス台帳（✅/⚠️ 自動判定）</span></a>
+      </div>
+      <p class="note">フォントを fonts/ に入れたら <code>node tools/fontscan.mjs</code> を再実行すると全生成物が追従します。</p>
+    </section>
+
+    <section>
+      <h2>外部 DS オフライン要約（external/）</h2>
+      <div class="grid">
+        <a class="card" href="external/README.md"><strong>external README</strong><span>一覧</span></a>
+        <a class="card" href="external/shadcn.md"><strong>shadcn + Radix</strong><span>現代 Web の標準感</span></a>
+        <a class="card" href="external/primer-carbon-spectrum.md"><strong>Primer / Carbon / Spectrum</strong><span>プロダクト級</span></a>
+        <a class="card" href="external/polaris-atlassian-material.md"><strong>Polaris / Atlassian / M3</strong><span>原則・タイポ</span></a>
+        <a class="card" href="external/japan.md"><strong>デジタル庁 / Spindle</strong><span>日本語・a11y</span></a>
+        <a class="card" href="external/steal-checklist.md"><strong>盗む単位チェック</strong><span>作業前リスト</span></a>
+        <a class="card" href="external/catalog.md"><strong>catalog</strong><span>オンライン URL 一覧</span></a>
+      </div>
+    </section>
+
+    <section>
+      <h2>関連ソース（grok_build 側プロジェクト）</h2>
+      <p style="font-size:13px; color: var(--muted); margin-bottom:10px;">
+        以下のプロジェクト実装正本は <code>~/grok_build/</code> 側にあります（pi_root 未移植）。pi_root 内で完結している資産は上記の systems/ tokens/ kazari-studio/ です。
+      </p>
+      <ul class="plain" style="opacity:0.6;">
+        <li><span>kikaku/styles.css</span></li>
+        <li><span>freebullet-lp/index.html</span></li>
+        <li><span>SRD/SRD_基本ルール_A3.html</span></li>
+        <li><span>hudeato/index.html</span></li>
+        <li><span>実況凄腕営業マン/assets/STYLE_GUIDE.md</span></li>
+        <li><span>00_HQ_PLAN-hudeato-ui.md</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    yume-kit/design-system/hub.html · ローカル参照専用 · 更新 2026-08-28
+  </footer>
+</body>
+</html>

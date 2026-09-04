@@ -1,0 +1,29 @@
+/* PuttyCrayme / kikaku — local tokens
+ * Source: kikaku/styles.css
+ */
+:root {
+  --bg-light: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-card-subtle: #f8fafc;
+  --bg-card-highlight: #eff6ff;
+
+  --border-subtle: #e2e8f0;
+  --border-strong: #94a3b8;
+  --border-dark: #0f172a;
+  --border-accent: #1e40af;
+
+  --accent-color: #1e40af;
+  --accent-color-hover: #1e3a8a;
+  --accent-subtle: #eff6ff;
+
+  --text-main: #09090b;
+  --text-body: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #475569;
+  --text-inverse: #ffffff;
+
+  --font-family: "Noto Sans JP", "Outfit", system-ui, sans-serif;
+  --font-heading: "Outfit", "Noto Sans JP", system-ui, sans-serif;
+}

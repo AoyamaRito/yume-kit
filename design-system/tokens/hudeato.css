@@ -1,0 +1,19 @@
+/* hudeato — local tokens (current + V3 target)
+ * Source: hudeato/index.html + 00_HQ_PLAN-hudeato-ui.md
+ */
+:root {
+  /* current */
+  --ink: #15181f;
+  --navy: #1e2c4d;
+  --sub: #5c6675;
+  --line: #e4e7ee;
+  --accent: #3b5bf5;
+  --accent-d: #2c46d6;
+  --soft: #f5f6fb;
+
+  /* V3 target (washi / ink / urushi) */
+  --washi-cream: #faf8f5;
+  --ink-black: #1c1d1f;
+  --urushi-red: #ab3b2c;
+  --border-beige: #e6dfd3;
+}

@@ -1,0 +1,36 @@
+{
+	"name": "swmr-pi",
+	"version": "0.3.0",
+	"description": "SWMR（Single Writer / Multiple Readers）運用システム for pi.dev — 要件台帳（議事録形式）+ READ のみの並列 + 視点付き・先入観なしレビュー + サブエージェントWatchdog/一時停止/中間報告/再開。他の LLM からこの体制を評価することもできる。",
+	"license": "MIT",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"swmr",
+		"single-writer",
+		"multiple-readers",
+		"ai-first",
+		"review",
+		"requirements",
+		"watchdog"
+	],
+	"scripts": {
+		"test": "node test/function-tester-guard.mjs && node test/watchdog.test.mjs && node e2e.mjs",
+		"test:function-tester-guard": "node test/function-tester-guard.mjs",
+		"test:watchdog": "node test/watchdog.test.mjs",
+		"e2e": "node e2e.mjs",
+		"coverage-diff": "node coverage-diff.mjs"
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*",
+		"typebox": "*"
+	},
+	"pi": {
+		"prompts": [
+			"./prompts"
+		],
+		"extensions": [
+			"./extensions"
+		]
+	}
+}

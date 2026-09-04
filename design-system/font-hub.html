@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>フォントブック — ローカルフォント見本帳 &amp; ライセンス台帳</title>
+<!-- @why: [2026-08-28] tools/fontscan.mjs の生成物。fonts/ に追加して node tools/fontscan.mjs を再実行すると再生成される。 -->
+<style>
+:root {
+  --bg: #FAFAF9;
+  --panel: #FFFFFF;
+  --ink: #18181B;
+  --muted: #71717A;
+  --line: #E4E4E7;
+  --row-hover: #F4F4F5;
+  --badge-bg: #F4F4F5;
+  --badge-ink: #52525B;
+  --code-bg: #F4F4F5;
+  --code-ink: #27272A;
+  --sp-ink: #18181B;
+  --sp-label: #A1A1AA;
+  --btn-bg: #FFFFFF;
+  --btn-border: #D4D4D8;
+  --btn-ink: #18181B;
+  --accent: #18181B;
+}
+[data-theme="dark"] {
+  --bg: #09090B;
+  --panel: #18181B;
+  --ink: #FAFAFA;
+  --muted: #A1A1AA;
+  --line: #27272A;
+  --row-hover: #27272A;
+  --badge-bg: #27272A;
+  --badge-ink: #D4D4D8;
+  --code-bg: #27272A;
+  --code-ink: #E4E4E7;
+  --sp-ink: #FAFAFA;
+  --sp-label: #71717A;
+  --btn-bg: #27272A;
+  --btn-border: #3F3F46;
+  --btn-ink: #FAFAFA;
+  --accent: #FAFAFA;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Noto Sans JP", "Hiragino Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+header {
+  border-bottom: 1px solid var(--line);
+  padding: 16px 28px;
+  background: var(--panel);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.kicker {
+  font-size: 10px;
+  letter-spacing: .2em;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+h1 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.font-count {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--badge-bg);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+.theme-btn {
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  color: var(--btn-ink);
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.theme-btn:hover { background: var(--row-hover); }
+
+/* 一括コントロールバー（上部固定・超高機能） */
+.sticky-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 28px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.03);
+}
+.search-input {
+  flex: 1 1 260px;
+  min-width: 200px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tab-btn.active {
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+.slider-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+.slider-group input { width: 90px; }
+
+/* 1フォント1行リスト */
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 28px 80px;
+}
+.font-list {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.font-row {
+  border-bottom: 1px solid var(--line);
+  transition: background .1s;
+}
+.font-row:last-child { border-bottom: none; }
+.font-row:hover { background: var(--row-hover); }
+
+/* 行のメイン部（1行圧縮） */
+.row-main {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  gap: 16px;
+  cursor: pointer;
+}
+.fav-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--muted);
+  opacity: 0.4;
+  transition: all .15s;
+  user-select: none;
+  flex: 0 0 24px;
+  text-align: center;
+}
+.fav-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
+  color: #E11D48;
+}
+.fav-btn.active {
+  opacity: 1;
+  color: #E11D48;
+}
+.row-meta {
+  flex: 0 0 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.font-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.font-tags {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tag {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--badge-bg);
+  color: var(--badge-ink);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: .05em;
+}
+.tag.lic { background: transparent; border: 1px solid var(--line); }
+
+/* 1行ストリーム見本（主役） */
+.row-sample {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 24px;
+  line-height: 1.3;
+  color: var(--sp-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row-toggle {
+  flex: 0 0 32px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--muted);
+  user-select: none;
+}
+
+/* アコーディオン詳細部（クリックで展開） */
+.row-detail {
+  display: none;
+  padding: 18px 20px 22px 230px;
+  background: var(--bg);
+  border-top: 1px dashed var(--line);
+}
+.font-row.open .row-detail { display: block; }
+.font-row.open .row-toggle { transform: rotate(180deg); }
+
+.detail-grid {
+  display: grid;
+  gap: 12px;
+}
+.spec-line {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+}
+.spec-lbl {
+  flex: 0 0 70px;
+  font-size: 10px;
+  letter-spacing: .15em;
+  color: var(--sp-label);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.spec-txt {
+  font-size: 20px;
+  line-height: 1.8;
+  color: var(--sp-ink);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.detail-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.detail-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  background: var(--code-bg);
+  color: var(--code-ink);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+footer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 28px 40px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div class="kicker">Local Font Book</div>
+    <h1>フォント見本帳</h1>
+    <span class="font-count" id="countBadge">38 Families</span>
+  </div>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <button id="licenseModalBtn" class="theme-btn" style="border-color:var(--btn-border);">📜 ライセンス早見表</button>
+    <button id="themeToggle" class="theme-btn">🌙 ダーク</button>
+  </div>
+</header>
+
+<!-- ライセンス早見表（トグル表示） -->
+<div id="licenseGuide" style="display:none; background:var(--panel); border-bottom:1px solid var(--line); padding:24px 28px; box-shadow:0 4px 12px rgba(0,0,0,.04);">
+  <div style="max-width:1400px; margin:0 auto;">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;">
+      <h2 style="font-size:14px; font-weight:700; color:var(--ink); margin:0;">収録フォントのライセンス概略（SIL OFL 1.1 / Apache 2.0）</h2>
+      <button id="closeLicGuide" style="background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer;">✕</button>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; font-size:12px; line-height:1.7;">
+      <div style="background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:14px 16px;">
+        <strong style="color:var(--ink); display:block; margin-bottom:6px;">⭕ 完全に許可されていること</strong>
+        <ul style="padding-left:18px; color:var(--muted); margin:0; display:grid; gap:4px;">
+          <li><b>商用利用・個人利用</b>（Webサイト、アプリ、動画、広告、ゲーム等）</li>
+          <li><b>Webフォント埋め込み</b>（<code>@font-face</code> やサブセット化）</li>
+          <li><b>印刷物・商品パッケージ・同人誌</b>への印字</li>
+          <li><b>ロゴ・商標デザイン</b>（文字をアウトライン化してロゴに使用）</li>
+          <li><b>改変・派生フォント作成</b>（フォント自体の字形修正・合成）</li>
+        </ul>
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:14px 16px;">
+        <strong style="color:var(--ink); display:block; margin-bottom:6px;">❌ 禁止されていること・要件</strong>
+        <ul style="padding-left:18px; color:var(--muted); margin:0; display:grid; gap:4px;">
+          <li><b>フォント単体での転売・販売</b>（フォントファイル自体をお金を取って売る行為）</li>
+          <li><b>改変後の非オープン化</b>（改変フォントを配布する場合は同じOFLライセンスを継承）</li>
+          <li><b>予約フォント名（Reserved Font Name）の無断使用</b>（改変時は別名をつける）</li>
+          <li><b>著作権表記の保持</b>（CSSや配布物に著作権テキストを残す — 当システムは自動内蔵）</li>
+        </ul>
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:14px 16px;">
+        <strong style="color:var(--ink); display:block; margin-bottom:6px;">ℹ️ 当ワークスペースでの利用方針</strong>
+        <p style="color:var(--muted); margin:0;">
+          当コレクションのフォントはすべて <code>SIL OFL 1.1</code> または <code>Apache 2.0</code> です。
+          制作する Web アプリ・LP・システム画面で<b>完全に自由・ロイヤリティフリー</b>で利用できます。
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sticky-bar">
+  <input type="text" id="customText" class="search-input" value="あいう アイウ 永字八法 春夏秋冬 0123 AaBbCc" placeholder="テスト文字列を入力（全フォントに即時反映）">
+  <div class="filter-tabs">
+    <button class="tab-btn active" data-cat="all">全て</button>
+    <button class="tab-btn" data-cat="fav" id="favTabBtn">❤️ お気に入り (<span id="favCount">0</span>)</button>
+    <button class="tab-btn" data-cat="sans">ゴシック</button>
+    <button class="tab-btn" data-cat="serif">明朝</button>
+    <button class="tab-btn" data-cat="brush">手書き/丸</button>
+    <button class="tab-btn" data-cat="display">見出し</button>
+    <button class="tab-btn" data-cat="mono">等幅</button>
+  </div>
+  <div class="slider-group">
+    <span>サイズ: <b id="szVal">24</b>px</span>
+    <input type="range" id="szSlider" min="14" max="56" value="24">
+  </div>
+</div>
+
+<main>
+  <div class="font-list" id="fontList"></div>
+</main>
+<footer>yume-kit/design-system/font-hub.html · 1行圧縮・高密度一覧版 · 自動生成 (2026-08-28 12:36:24)</footer>
+<script>
+var FONT_DATA = {"generatedAt":"2026-08-28 12:36:24","fontDir":"fonts","families":[{"name":"Alegreya","category":"serif","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Alegreya — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Alegreya-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Alegreya-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Alex Brush","category":"brush","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Alex Brush — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Alex Brush-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Allura","category":"brush","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Allura — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Allura-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Anton","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Anton — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Anton-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Archivo Black","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Archivo Black — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Archivo Black-Regular.woff2","format":"woff2","weight":800,"style":"normal"}]},{"name":"Bebas Neue","category":"display","copyright":"Copyright 2018 The Bebas Neue Project Authors (https://github.com/dharmatype/Bebas-Neue)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"世界中でポスターやバナーに使われるオールキャップス見出しフォントの王者","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Bebas Neue-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"BIZ UDGothic","category":"mono","copyright":"Copyright 2022 The BIZ UPGothic Project Authors (https://github.com/googlefonts/morisawa-biz-ud-gothic)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"モリサワ提供。等幅UDゴシック。帳票・コード・表組みに最適","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"BIZ UDGothic-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"BIZ UDGothic-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"BIZ UDMincho","category":"serif","copyright":"Copyright 2022 The BIZ UDMincho Project Authors (https://github.com/googlefonts/morisawa-biz-ud-mincho)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"モリサワ提供。等幅UD明朝。公的文書や縦組みに抜群","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"BIZ UDMincho-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"BIZ UDPGothic","category":"sans","copyright":"Copyright 2022 The BIZ UPGothic Project Authors (https://github.com/googlefonts/morisawa-biz-ud-gothic)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"モリサワ提供。圧倒的可読性のプロポーショナルUDゴシック","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"BIZ UDPGothic-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"BIZ UDPGothic-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"BIZ UDPMincho","category":"serif","copyright":"Copyright 2022 The BIZ UDPMincho Project Authors (https://github.com/googlefonts/morisawa-biz-ud-mincho)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"モリサワ提供。小サイズでも潰れないプロポーショナルUD明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"BIZ UDPMincho-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Bungee","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Bungee — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Bungee-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Cascadia Code","category":"mono","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Cascadia Code — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Cascadia Code-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Cascadia Code-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Caveat","category":"brush","copyright":"Copyright 2014 The Caveat Project Authors (https://github.com/googlefonts/caveat)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"手書き風の軽やかでおしゃれなスクリプトペン字","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Caveat-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Caveat-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Cherry Bomb One","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Cherry Bomb One — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Cherry Bomb One-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Cinzel","category":"serif","copyright":"Copyright 2020 The Cinzel Project Authors (https://github.com/ndiscover/Cinzel)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"古代ローマの石碑碑文に基づく荘厳で映画的なオールキャップスセリフ","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Cinzel-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Cinzel-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Comfortaa","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Comfortaa — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Comfortaa-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Comfortaa-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Cormorant Garamond","category":"serif","copyright":"Copyright 2015 The Cormorant Project Authors (https://github.com/CatharsisFonts/Cormorant)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"16世紀のガラモン活字を現代に蘇らせた最高峰のクラシックセリフ","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Cormorant Garamond-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Cormorant Garamond-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Courier Prime","category":"mono","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Courier Prime — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Courier Prime-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Courier Prime-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Dancing Script","category":"brush","copyright":"Copyright 2019 The Dancing Script Project Authors (https://github.com/googlefonts/dancingscript)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"踊るような躍動感としなやかさを持つ大人気カリグラフィ筆記体","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Dancing Script-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Dancing Script-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Darumadrop One","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Darumadrop One — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Darumadrop One-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Dela Gothic One","category":"display","copyright":"Copyright 2020 The Dela Gothic One Project Authors (https://github.com/syakuzen/DelaGothic)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"圧倒的な存在感を持つ超極太・扁平ディスプレイゴシック","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Dela Gothic One-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"DM Mono","category":"mono","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"DM Mono — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"DM Mono-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"DM Mono-Medium.woff2","format":"woff2","weight":500,"style":"normal"}]},{"name":"DM Sans","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"DM Sans — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"DM Sans-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"DM Sans-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"DM Serif Display","category":"serif","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"DM Serif Display — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"DM Serif Display-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"DotGothic16","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"DotGothic16 — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"DotGothic16-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"EB Garamond","category":"serif","copyright":"Copyright 2017 The EB Garamond Project Authors (https://github.com/octaviopardo/EBGaramond12)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"クロード・ガラモンの1592年標本を忠実にデジタル復刻した正統派セリフ","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"EB Garamond-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"EB Garamond-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Fira Code","category":"mono","copyright":"Copyright 2014 The Fira Code Project Authors (https://github.com/tonsky/FiraCode)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"合字（リガチャ: =>, ===, != など）に特化した大人気等幅フォント","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Fira Code-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Fira Code-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Fira Sans","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Fira Sans — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Fira Sans-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Fira Sans-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Fraunces","category":"serif","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Fraunces — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Fraunces-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Fraunces-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Great Vibes","category":"brush","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Great Vibes — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Great Vibes-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Hachi Maru Pop","category":"brush","copyright":"Copyright 2020 The Hachi Maru Pop Project Authors (https://github.com/fontworks-fonts/HachiMaruPop)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"80年代の丸文字・少女マンガ風ポップカルチャー体","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Hachi Maru Pop-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"IBM Plex Sans JP","category":"sans","copyright":"Copyright 2021 IBM Corp. with Reserved Font Name 'Plex'","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"IBM 公式のコーポレート書体。知的・構築的な美しさ","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"IBM Plex Sans JP-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"IBM Plex Sans JP-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Inconsolata","category":"mono","copyright":"Copyright 2006 Raph Levien","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Raph Levien氏による美しさを極めた古典的プログラミング等幅フォント","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Inconsolata-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Inconsolata-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Inter","category":"sans","copyright":"Copyright 2016-2024 The Inter Project Authors (https://github.com/rsms/inter)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"現代 Web / UI デザインの世界標準サンセリフ。完璧な画面視認性","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Inter-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Inter-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"JetBrains Mono","category":"mono","copyright":"Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"JetBrains 公式。開発者のために設計された世界最高峰のコードフォント","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"JetBrains Mono-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"JetBrains Mono-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Jost","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Jost — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Jost-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Jost-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Kaisei Decol","category":"serif","copyright":"Copyright 2020 The Kaisei Project Authors (https://github.com/Font-Kai/Kaisei)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"解星 デコル。先端の丸い雫（ドット）が可愛らしい装飾明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Kaisei Decol-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Kaisei Decol-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Kaisei HarunoUmi","category":"serif","copyright":"Copyright 2020 The Kaisei Project Authors (https://github.com/Font-Kai/Kaisei)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"解星 春の海。流れるような筆致と柔らかな抑揚を持つ明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Kaisei HarunoUmi-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Kaisei HarunoUmi-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Kaisei Opti","category":"serif","copyright":"Copyright 2020 The Kaisei Project Authors (https://github.com/Font-Kai/Kaisei)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"解星 オプティ。水平・垂直の直線と幾何学的なウロコのモダン明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Kaisei Opti-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Kaisei Opti-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Kaisei Tokumin","category":"serif","copyright":"Copyright 2020 The Kaisei Project Authors (https://github.com/Font-Kai/Kaisei)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"解星 特民。活字のウロコと独特の骨格が際立つ個性派明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Kaisei Tokumin-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Kaisei Tokumin-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Kiwi Maru","category":"brush","copyright":"Copyright 2020 The Kiwi Maru Project Authors (https://github.com/Kiwi-Desk/Kiwi-Maru)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"温かみとクラフト感のある手書き風丸ゴシック","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Kiwi Maru-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Kiwi Maru-Medium.woff2","format":"woff2","weight":500,"style":"normal"}]},{"name":"Klee One","category":"brush","copyright":"Copyright 2020 The Klee Project Authors (https://github.com/fontworks-fonts/Klee)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"フォントワークス提供。教科書体とペン字の美しさを兼ね備えた大人気書体","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Klee One-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Klee One-SemiBold.woff2","format":"woff2","weight":600,"style":"normal"}]},{"name":"Kosugi","category":"sans","copyright":"Copyright 2018 The Kosugi Project Authors (https://github.com/googlefonts/kosugi)","licenseText":"Apache License 2.0","licenseUrl":"https://www.apache.org/licenses/LICENSE-2.0","note":"モトヤ Lシダー由来。直線的で引き締まった本文ゴシック","lic":{"ok":true,"kind":"Apache 2.0","note":"商用自由 / 帰属表示推奨"},"files":[{"file":"Kosugi-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Kosugi Maru","category":"brush","copyright":"Copyright 2018 The Kosugi Maru Project Authors (https://github.com/googlefonts/kosugi-maru)","licenseText":"Apache License 2.0","licenseUrl":"https://www.apache.org/licenses/LICENSE-2.0","note":"モトヤ Lマルベリ由来。看板や公共サインでおなじみの丸ゴシック","lic":{"ok":true,"kind":"Apache 2.0","note":"商用自由 / 帰属表示推奨"},"files":[{"file":"Kosugi Maru-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Lato","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Lato — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Lato-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Lato-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Libre Baskerville","category":"serif","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Libre Baskerville — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Libre Baskerville-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Libre Baskerville-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Libre Bodoni","category":"serif","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Libre Bodoni — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Libre Bodoni-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Libre Bodoni-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Lora","category":"serif","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Lora — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Lora-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Lora-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"M PLUS 1 Code","category":"mono","copyright":"Copyright 2021 The M+ FONTS Project Authors (https://github.com/coz-m/MPLUS_FONTS)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"日本語対応プログラミング等幅フォント。コードと和文が美しく揃う","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"M PLUS 1 Code-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"M PLUS 1 Code-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"M PLUS 1p","category":"sans","copyright":"Copyright 2021 The M+ FONTS Project Authors (https://github.com/coz-m/MPLUS_FONTS)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"森下浩司氏による国産オープンソースゴシックの最高峰","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"M PLUS 1p-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"M PLUS 1p-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"M PLUS 2","category":"sans","copyright":"Copyright 2021 The M+ FONTS Project Authors (https://github.com/coz-m/MPLUS_FONTS)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"M PLUS の現代的再設計版。長文可読性に優れたゴシック","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"M PLUS 2-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"M PLUS 2-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"M PLUS Rounded 1c","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"M PLUS Rounded 1c — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"M PLUS Rounded 1c-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"M PLUS Rounded 1c-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Manrope","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Manrope — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Manrope-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Manrope-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Merriweather","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Merriweather — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Merriweather-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Merriweather-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Mochiy Pop One","category":"brush","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Mochiy Pop One — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Mochiy Pop One-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Mochiy Pop P One","category":"brush","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Mochiy Pop P One — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Mochiy Pop P One-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Montserrat","category":"sans","copyright":"Copyright 2011 The Montserrat Project Authors (https://github.com/JulietaUla/Montserrat)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"ブエノスアイレスの伝統的看板にインスパイアされた幾何学サンセリフの傑作","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Montserrat-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Montserrat-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"New Tegomin","category":"brush","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"New Tegomin — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"New Tegomin-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Noto Sans JP","category":"sans","copyright":"Copyright 2014-2021 Adobe (http://www.adobe.com/)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Adobe/Google共同開発。現代日本語ゴシックの標準金字塔","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Noto Sans JP-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Noto Sans JP-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Noto Serif JP","category":"serif","copyright":"Copyright 2014-2021 Adobe (http://www.adobe.com/)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"源ノ明朝。現代の電子書籍・Web本文の標準明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Noto Serif JP-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Noto Serif JP-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Nunito","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Nunito — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Nunito-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Nunito-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Open Sans","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Open Sans — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Open Sans-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Open Sans-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Orbitron","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Orbitron — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Orbitron-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Orbitron-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Oswald","category":"sans","copyright":"Copyright 2016 The Oswald Project Authors (https://github.com/googlefonts/OswaldFont)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"縦長（コンデンスド）の力強い見出し・看板フォント","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Oswald-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Oswald-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Pacifico","category":"brush","copyright":"Copyright 2011 The Pacifico Project Authors (https://github.com/googlefonts/pacificofont)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"アメリカンレトロ・サーフカルチャーを感じさせる極太ブラシスクリプト","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Pacifico-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Playfair Display","category":"serif","copyright":"Copyright 2017 The Playfair Display Project Authors (https://github.com/clausgg/Playfair)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"高級ファッション誌・タイトル用のエレガントなモダンローマンセリフ","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Playfair Display-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Playfair Display-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Plus Jakarta Sans","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Plus Jakarta Sans — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Plus Jakarta Sans-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Plus Jakarta Sans-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Poppins","category":"sans","copyright":"Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/poppins)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"円を基調としたモダンで親しみやすい大人気幾何学サンセリフ","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Poppins-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Poppins-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Potta One","category":"brush","copyright":"Copyright 2020 The Potta Project Authors (https://github.com/fontworks-fonts/Potta)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"フォントワークス提供。ぽてっとした愛嬌と手描きの温もり","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Potta One-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Press Start 2P","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Press Start 2P — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Press Start 2P-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Quicksand","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Quicksand — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Quicksand-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Quicksand-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Rampart One","category":"display","copyright":"Copyright 2020 The Rampart Project Authors (https://github.com/fontworks-fonts/Rampart)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"フォントワークス提供。立体的な影と袋文字の3Dタイトル書体","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Rampart One-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Reggae One","category":"display","copyright":"Copyright 2020 The Reggae Project Authors (https://github.com/fontworks-fonts/Reggae)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"フォントワークス提供。リズム感と斜め払いが特徴的な躍動感ある見出し","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Reggae One-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Righteous","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Righteous — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Righteous-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Roboto","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Roboto — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Roboto-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Roboto-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Roboto Mono","category":"mono","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Roboto Mono — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Roboto Mono-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Roboto Mono-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Roboto Serif","category":"serif","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Roboto Serif — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Roboto Serif-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Roboto Serif-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Roboto Slab","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Roboto Slab — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Roboto Slab-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Roboto Slab-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"RocknRoll One","category":"display","copyright":"Copyright 2020 The RocknRoll Project Authors (https://github.com/fontworks-fonts/RocknRoll)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"フォントワークス提供。丸みとシャープさが同居したエネルギッシュなPOP","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"RocknRoll One-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Rubik","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Rubik — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Rubik-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Rubik-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Sacramento","category":"brush","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Sacramento — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Sacramento-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Satisfy","category":"brush","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Satisfy — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Satisfy-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Sawarabi Gothic","category":"sans","copyright":"Copyright 2016 mdoc for Sawarabi Fonts","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"さわらびゴシック。明快でクリーンなオープンソース日本語ゴシック","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Sawarabi Gothic-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Sawarabi Mincho","category":"serif","copyright":"Copyright 2016 mdoc for Sawarabi Fonts","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"さわらび明朝。繊細で上品なオープンソース日本語明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Sawarabi Mincho-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Shippori Antique","category":"display","copyright":"Copyright 2020 The Shippori Antique Project Authors (https://github.com/fontdasu/ShipporiAntique)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"マンガのフキダシや見出しでおなじみのアンチック体（ゴシック漢字×明朝かな）","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Shippori Antique-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Shippori Antique B1","category":"display","copyright":"Copyright 2020 The Shippori Antique Project Authors (https://github.com/fontdasu/ShipporiAntique)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"アンチック体の墨溜まり・滲み版。レトロな印刷の風合い","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Shippori Antique B1-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Shippori Mincho","category":"serif","copyright":"Copyright 2019 The Shippori Mincho Project Authors (https://github.com/fontdasu/ShipporiMincho)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"東京築地活版製造所の活字を復刻。美しさを極めたクラシック明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Shippori Mincho-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Shippori Mincho-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Shippori Mincho B1","category":"serif","copyright":"Copyright 2019 The Shippori Mincho Project Authors (https://github.com/fontdasu/ShipporiMincho)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"築地体明朝の墨溜まり・滲みを再現した味わい深い明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Shippori Mincho B1-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Shippori Mincho B1-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Silkscreen","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Silkscreen — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Silkscreen-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Source Code Pro","category":"mono","copyright":"Copyright 2010-2021 Adobe (http://www.adobe.com/)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Adobe 公式のプログラミング用等幅フォント。UIやターミナルで抜群の安定感","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Source Code Pro-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Source Code Pro-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Source Serif 4","category":"serif","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Source Serif 4 — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Source Serif 4-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Source Serif 4-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Space Grotesk","category":"sans","copyright":"Copyright 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"テック・Web3・近未来感あふれる幾何学サンセリフ","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Space Grotesk-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Space Grotesk-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Spectral","category":"serif","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Spectral — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Spectral-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Spectral-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Stick","category":"display","copyright":"Copyright 2020 The Stick Project Authors (https://github.com/fontworks-fonts/Stick)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"フォントワークス提供。直線のスティックで構成された幾何学的デザイン体","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Stick-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Syne","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Syne — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Syne-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Syne-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"UnifrakturMaguntia","category":"display","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"UnifrakturMaguntia — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"UnifrakturMaguntia-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Victor Mono","category":"mono","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Victor Mono — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Victor Mono-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Victor Mono-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Work Sans","category":"sans","copyright":"Google Fonts / Fontsource Open Source Authors","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"Work Sans — 商用利用・Web埋込完全フリー (OFL 1.1)","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Work Sans-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Work Sans-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Yuji Boku","category":"brush","copyright":"Copyright 2020 The Yuji Project Authors (https://github.com/Kinutafontfactory/Yuji)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"絹田フォント。重厚で力強い毛筆書体（墨）","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Yuji Boku-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Yuji Mai","category":"brush","copyright":"Copyright 2020 The Yuji Project Authors (https://github.com/Kinutafontfactory/Yuji)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"絹田フォント。軽やかに舞うような流麗な毛筆書体（舞）","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Yuji Mai-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Yuji Syuku","category":"brush","copyright":"Copyright 2020 The Yuji Project Authors (https://github.com/Kinutafontfactory/Yuji)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"絹田フォント。静謐で落ち着いた伝統的毛筆書体（宿）","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Yuji Syuku-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Yusei Magic","category":"brush","copyright":"Copyright 2020 The Yusei Magic Project Authors (https://github.com/fontworks-fonts/YuseiMagic)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"フォントワークス提供。油性マジックで書いたような親しみあるPOP手書き","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Yusei Magic-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Zen Antique","category":"display","copyright":"Copyright 2021 The Zen Antique Project Authors (https://github.com/googlefonts/zen-antique)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"大日本印刷。格調高いアンチック体","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Zen Antique-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Zen Kaku Gothic New","category":"sans","copyright":"Copyright 2022 The Zen Kaku Gothic New Project Authors (https://github.com/googlefonts/zen-kakugothic)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"大日本印刷・よもぎフォント系。端正で美しい本文ゴシック","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Zen Kaku Gothic New-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Zen Kaku Gothic New-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Zen Kurenaido","category":"brush","copyright":"Copyright 2020 The Zen Kurenaido Project Authors (https://github.com/googlefonts/zen-kurenaido)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"大日本印刷。少し右上がりの自然な手書きボールペン文字","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Zen Kurenaido-Regular.woff2","format":"woff2","weight":400,"style":"normal"}]},{"name":"Zen Maru Gothic","category":"brush","copyright":"Copyright 2022 The Zen Maru Gothic Project Authors (https://github.com/googlefonts/zen-marugothic)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"柔らかく親しみやすい、完成度の極めて高い丸ゴシック","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Zen Maru Gothic-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Zen Maru Gothic-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]},{"name":"Zen Old Mincho","category":"serif","copyright":"Copyright 2022 The Zen Old Mincho Project Authors (https://github.com/googlefonts/zen-oldmincho)","licenseText":"SIL OPEN FONT LICENSE Version 1.1","licenseUrl":"https://openfontlicense.org","note":"伝統的な活字の骨格を持つ、格調高い本文用オールド明朝","lic":{"ok":true,"kind":"SIL OFL 1.1","note":"商用・Web埋込自由 / 単体再頒布と改変は同ライセンス継承"},"files":[{"file":"Zen Old Mincho-Regular.woff2","format":"woff2","weight":400,"style":"normal"},{"file":"Zen Old Mincho-Bold.woff2","format":"woff2","weight":700,"style":"normal"}]}]};
+</script>
+<script>
+(function () {
+  'use strict';
+  var fams = FONT_DATA.families || [];
+
+  // ---- テーマ切り替え
+  var themeBtn = document.getElementById('themeToggle');
+  function setTheme(t) {
+    if (t === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeBtn.textContent = '☀️ ライト';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      themeBtn.textContent = '🌙 ダーク';
+    }
+    try { localStorage.setItem('ds_theme', t); } catch (e) {}
+  }
+  var saved = 'light';
+  try { saved = localStorage.getItem('ds_theme') || 'light'; } catch (e) {}
+  setTheme(saved);
+  themeBtn.addEventListener('click', function () {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    setTheme(isDark ? 'light' : 'dark');
+  });
+
+  // ---- font-face 注入（hub.html は fonts/ からの相対読込）
+  var st = document.createElement('style');
+  st.textContent = '@font-face {\n  font-family: "Alegreya";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Alegreya-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Alegreya";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Alegreya-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Alex Brush";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Alex Brush-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Allura";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Allura-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Anton";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Anton-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Archivo Black";\n  font-weight: 800;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Archivo Black-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Bebas Neue";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Bebas Neue-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "BIZ UDGothic";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/BIZ UDGothic-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "BIZ UDGothic";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/BIZ UDGothic-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "BIZ UDMincho";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/BIZ UDMincho-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "BIZ UDPGothic";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/BIZ UDPGothic-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "BIZ UDPGothic";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/BIZ UDPGothic-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "BIZ UDPMincho";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/BIZ UDPMincho-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Bungee";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Bungee-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Cascadia Code";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Cascadia Code-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Cascadia Code";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Cascadia Code-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Caveat";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Caveat-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Caveat";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Caveat-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Cherry Bomb One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Cherry Bomb One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Cinzel";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Cinzel-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Cinzel";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Cinzel-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Comfortaa";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Comfortaa-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Comfortaa";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Comfortaa-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Cormorant Garamond";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Cormorant Garamond-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Cormorant Garamond";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Cormorant Garamond-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Courier Prime";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Courier Prime-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Courier Prime";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Courier Prime-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Dancing Script";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Dancing Script-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Dancing Script";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Dancing Script-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Darumadrop One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Darumadrop One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Dela Gothic One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Dela Gothic One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "DM Mono";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/DM Mono-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "DM Mono";\n  font-weight: 500;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/DM Mono-Medium.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "DM Sans";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/DM Sans-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "DM Sans";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/DM Sans-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "DM Serif Display";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/DM Serif Display-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "DotGothic16";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/DotGothic16-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "EB Garamond";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/EB Garamond-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "EB Garamond";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/EB Garamond-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Fira Code";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Fira Code-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Fira Code";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Fira Code-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Fira Sans";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Fira Sans-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Fira Sans";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Fira Sans-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Fraunces";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Fraunces-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Fraunces";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Fraunces-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Great Vibes";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Great Vibes-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Hachi Maru Pop";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Hachi Maru Pop-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "IBM Plex Sans JP";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/IBM Plex Sans JP-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "IBM Plex Sans JP";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/IBM Plex Sans JP-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Inconsolata";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Inconsolata-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Inconsolata";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Inconsolata-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Inter";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Inter-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Inter";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Inter-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "JetBrains Mono";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/JetBrains Mono-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "JetBrains Mono";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/JetBrains Mono-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Jost";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Jost-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Jost";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Jost-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kaisei Decol";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kaisei Decol-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kaisei Decol";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kaisei Decol-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kaisei HarunoUmi";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kaisei HarunoUmi-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kaisei HarunoUmi";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kaisei HarunoUmi-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kaisei Opti";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kaisei Opti-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kaisei Opti";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kaisei Opti-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kaisei Tokumin";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kaisei Tokumin-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kaisei Tokumin";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kaisei Tokumin-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kiwi Maru";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kiwi Maru-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kiwi Maru";\n  font-weight: 500;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kiwi Maru-Medium.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Klee One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Klee One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Klee One";\n  font-weight: 600;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Klee One-SemiBold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kosugi";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kosugi-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Kosugi Maru";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Kosugi Maru-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Lato";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Lato-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Lato";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Lato-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Libre Baskerville";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Libre Baskerville-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Libre Baskerville";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Libre Baskerville-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Libre Bodoni";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Libre Bodoni-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Libre Bodoni";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Libre Bodoni-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Lora";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Lora-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Lora";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Lora-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "M PLUS 1 Code";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/M PLUS 1 Code-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "M PLUS 1 Code";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/M PLUS 1 Code-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "M PLUS 1p";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/M PLUS 1p-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "M PLUS 1p";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/M PLUS 1p-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "M PLUS 2";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/M PLUS 2-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "M PLUS 2";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/M PLUS 2-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "M PLUS Rounded 1c";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/M PLUS Rounded 1c-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "M PLUS Rounded 1c";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/M PLUS Rounded 1c-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Manrope";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Manrope-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Manrope";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Manrope-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Merriweather";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Merriweather-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Merriweather";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Merriweather-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Mochiy Pop One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Mochiy Pop One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Mochiy Pop P One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Mochiy Pop P One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Montserrat";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Montserrat-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Montserrat";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Montserrat-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "New Tegomin";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/New Tegomin-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Noto Sans JP";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Noto Sans JP-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Noto Sans JP";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Noto Sans JP-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Noto Serif JP";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Noto Serif JP-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Noto Serif JP";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Noto Serif JP-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Nunito";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Nunito-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Nunito";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Nunito-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Open Sans";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Open Sans-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Open Sans";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Open Sans-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Orbitron";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Orbitron-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Orbitron";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Orbitron-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Oswald";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Oswald-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Oswald";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Oswald-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Pacifico";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Pacifico-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Playfair Display";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Playfair Display-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Playfair Display";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Playfair Display-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Plus Jakarta Sans";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Plus Jakarta Sans-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Plus Jakarta Sans";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Plus Jakarta Sans-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Poppins";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Poppins-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Poppins";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Poppins-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Potta One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Potta One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Press Start 2P";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Press Start 2P-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Quicksand";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Quicksand-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Quicksand";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Quicksand-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Rampart One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Rampart One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Reggae One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Reggae One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Righteous";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Righteous-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Roboto";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Roboto-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Roboto";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Roboto-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Roboto Mono";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Roboto Mono-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Roboto Mono";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Roboto Mono-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Roboto Serif";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Roboto Serif-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Roboto Serif";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Roboto Serif-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Roboto Slab";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Roboto Slab-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Roboto Slab";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Roboto Slab-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "RocknRoll One";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/RocknRoll One-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Rubik";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Rubik-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Rubik";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Rubik-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Sacramento";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Sacramento-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Satisfy";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Satisfy-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Sawarabi Gothic";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Sawarabi Gothic-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Sawarabi Mincho";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Sawarabi Mincho-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Shippori Antique";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Shippori Antique-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Shippori Antique B1";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Shippori Antique B1-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Shippori Mincho";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Shippori Mincho-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Shippori Mincho";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Shippori Mincho-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Shippori Mincho B1";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Shippori Mincho B1-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Shippori Mincho B1";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Shippori Mincho B1-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Silkscreen";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Silkscreen-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Source Code Pro";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Source Code Pro-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Source Code Pro";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Source Code Pro-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Source Serif 4";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Source Serif 4-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Source Serif 4";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Source Serif 4-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Space Grotesk";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Space Grotesk-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Space Grotesk";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Space Grotesk-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Spectral";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Spectral-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Spectral";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Spectral-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Stick";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Stick-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Syne";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Syne-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Syne";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Syne-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "UnifrakturMaguntia";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/UnifrakturMaguntia-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Victor Mono";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Victor Mono-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Victor Mono";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Victor Mono-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Work Sans";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Work Sans-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Work Sans";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Work Sans-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Yuji Boku";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Yuji Boku-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Yuji Mai";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Yuji Mai-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Yuji Syuku";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Yuji Syuku-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Yusei Magic";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Yusei Magic-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Zen Antique";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Zen Antique-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Zen Kaku Gothic New";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Zen Kaku Gothic New-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Zen Kaku Gothic New";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Zen Kaku Gothic New-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Zen Kurenaido";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Zen Kurenaido-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Zen Maru Gothic";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Zen Maru Gothic-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Zen Maru Gothic";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Zen Maru Gothic-Bold.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Zen Old Mincho";\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Zen Old Mincho-Regular.woff2") format("woff2");\n}\n\n@font-face {\n  font-family: "Zen Old Mincho";\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n  src: url("fonts/Zen Old Mincho-Bold.woff2") format("woff2");\n}\n\n';
+  document.head.appendChild(st);
+
+  // ---- ライセンスガイド開閉
+  var licBtn = document.getElementById('licenseModalBtn');
+  var licGuide = document.getElementById('licenseGuide');
+  var closeLic = document.getElementById('closeLicGuide');
+  if (licBtn && licGuide && closeLic) {
+    licBtn.addEventListener('click', function(){
+      var isHidden = licGuide.style.display === 'none';
+      licGuide.style.display = isHidden ? 'block' : 'none';
+      licBtn.style.background = isHidden ? 'var(--row-hover)' : 'var(--btn-bg)';
+    });
+    closeLic.addEventListener('click', function(){
+      licGuide.style.display = 'none';
+      licBtn.style.background = 'var(--btn-bg)';
+    });
+  }
+  document.getElementById('countBadge').textContent = fams.length + ' Families';
+
+  var customInput = document.getElementById('customText');
+  var szSlider = document.getElementById('szSlider');
+  var szVal = document.getElementById('szVal');
+  var fontList = document.getElementById('fontList');
+  var currentCat = 'all';
+
+  // ---- お気に入り管理 (localStorage: ds_font_favs)
+  var favs = {};
+  try {
+    var savedFavs = JSON.parse(localStorage.getItem('ds_font_favs') || '[]');
+    savedFavs.forEach(function(k){ favs[k] = true; });
+  } catch(e){}
+
+  function updateFavCount() {
+    var count = Object.keys(favs).filter(function(k){ return favs[k]; }).length;
+    var el = document.getElementById('favCount');
+    if (el) el.textContent = count;
+  }
+  updateFavCount();
+
+  function toggleFav(name, btn, e) {
+    if (e) e.stopPropagation();
+    if (favs[name]) {
+      delete favs[name];
+      btn.classList.remove('active');
+      btn.textContent = '♡';
+    } else {
+      favs[name] = true;
+      btn.classList.add('active');
+      btn.textContent = '❤️';
+    }
+    try {
+      localStorage.setItem('ds_font_favs', JSON.stringify(Object.keys(favs)));
+    } catch(e){}
+    updateFavCount();
+    if (currentCat === 'fav') {
+      renderList();
+    }
+  }
+
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  // ---- 1行フォントリスト描画
+  var SPEC = [
+    ['ひらがな', 'あいうえお かきくけこ さしすせそ たちつてと なにぬねの はひふへほ まみむめも やゆよ らりるれろ わをん がぎぐげご ざじずぜぞ だぢづでど ばびぶべぼ ぱぴぷぺぽ'],
+    ['カタカナ', 'アイウエオ カキクケコ サシスセソ タチツテト ナニヌネノ ハヒフヘホ マミムメモ ヤユヨ ラリルレロ ワヲン ガギグゲゴ ザジズゼゾ ダヂヅデド バビブベボ パピプペポ'],
+    ['漢字', '永字八法 春夏秋冬 花鳥風月 東京都特別区 日本語漢字見本 鬱薔薇驚鑑璽'],
+    ['数字・英字', '0 1 2 3 4 5 6 7 8 9 · ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz']
+  ];
+
+  function renderList() {
+    fontList.innerHTML = '';
+    var filtered = fams.filter(function(f){
+      if (currentCat === 'fav') return !!favs[f.name];
+      if (currentCat === 'all') return true;
+      return f.category === currentCat;
+    });
+
+    filtered.forEach(function (f) {
+      var row = document.createElement('div');
+      row.className = 'font-row';
+
+      var lic = f.lic || { ok:true, kind:'OFL 1.1' };
+      var wts = f.files.map(function(x){ return 'w' + x.weight; }).join('/');
+      var isFav = !!favs[f.name];
+
+      var mainDiv = document.createElement('div');
+      mainDiv.className = 'row-main';
+
+      var favBtn = document.createElement('button');
+      favBtn.className = 'fav-btn' + (isFav ? ' active' : '');
+      favBtn.textContent = isFav ? '❤️' : '♡';
+      favBtn.title = isFav ? 'お気に入りを解除' : 'お気に入りに追加';
+      favBtn.addEventListener('click', function(e){ toggleFav(f.name, favBtn, e); });
+
+      var metaDiv = document.createElement('div');
+      metaDiv.className = 'row-meta';
+      metaDiv.innerHTML = '<div class="font-title">' + esc(f.name) + '</div><div class="font-tags"><span class="tag">' + esc(f.category) + '</span><span class="tag">' + wts + '</span><span class="tag lic">' + esc(lic.kind) + '</span></div>';
+
+      var sampleDiv = document.createElement('div');
+      sampleDiv.className = 'row-sample';
+      sampleDiv.style.fontFamily = '"' + f.name + '", sans-serif';
+      sampleDiv.style.fontSize = szSlider.value + 'px';
+      sampleDiv.textContent = customInput.value;
+
+      var toggleDiv = document.createElement('div');
+      toggleDiv.className = 'row-toggle';
+      toggleDiv.textContent = '▾';
+
+      mainDiv.appendChild(favBtn);
+      mainDiv.appendChild(metaDiv);
+      mainDiv.appendChild(sampleDiv);
+      mainDiv.appendChild(toggleDiv);
+
+      // 詳細部（アコーディオン）
+      var detailDiv = document.createElement('div');
+      detailDiv.className = 'row-detail';
+
+      var detailGrid = document.createElement('div');
+      detailGrid.className = 'detail-grid';
+
+      SPEC.forEach(function(s){
+        var sLine = document.createElement('div');
+        sLine.className = 'spec-line';
+        var sTxt = document.createElement('span');
+        sTxt.className = 'spec-txt';
+        sTxt.style.fontFamily = '"' + f.name + '", sans-serif';
+        sTxt.textContent = s[1];
+        sLine.innerHTML = '<span class="spec-lbl">' + s[0] + '</span>';
+        sLine.appendChild(sTxt);
+        detailGrid.appendChild(sLine);
+      });
+
+      var detailFooter = document.createElement('div');
+      detailFooter.className = 'detail-footer';
+      var noteText = f.note ? esc(f.note) : '';
+      var copyText = f.copyright ? '<span style="color:var(--muted); font-size:10px;">' + esc(f.copyright) + '</span>' : '';
+      var licTerms = '<span style="display:inline-flex; gap:6px; font-size:10px; color:var(--muted);"><span style="color:#16A34A;">●商用○</span> <span>●Web埋込○</span> <span>●改変○</span> <span style="color:#DC2626;">●単体販売✕</span></span>';
+      var licLink = f.licenseUrl ? '<a href="' + esc(f.licenseUrl) + '" target="_blank" rel="noopener" style="color:var(--muted); text-decoration:underline;">' + esc(lic.kind) + ' 原文</a>' : '<span>' + esc(lic.kind) + '</span>';
+
+      detailFooter.innerHTML = '<div style="display:grid; gap:4px;"><div>' + (noteText ? '<b style="color:var(--ink);">' + noteText + '</b> ' : '') + licTerms + ' · ' + licLink + '</div>' + copyText + '</div><span class="detail-code">font-family: "' + esc(f.name) + '";</span>';
+
+      detailDiv.appendChild(detailGrid);
+      detailDiv.appendChild(detailFooter);
+
+      row.appendChild(mainDiv);
+      row.appendChild(detailDiv);
+
+      mainDiv.addEventListener('click', function(){
+        row.classList.toggle('open');
+      });
+
+      fontList.appendChild(row);
+    });
+
+    if (filtered.length === 0) {
+      fontList.innerHTML = '<div style="padding:30px; text-align:center; color:var(--muted);">該当するフォントがありません</div>';
+    }
+  }
+
+  // リアルタイム入力連動（全フォントの一行見本が一瞬で書き換わる）
+  customInput.addEventListener('input', function(){
+    var val = customInput.value || 'あいう アイウ 永字八法 春夏秋冬 0123 AaBbCc';
+    var samples = document.querySelectorAll('.row-sample');
+    for (var i = 0; i < samples.length; i++) {
+      samples[i].textContent = val;
+    }
+  });
+
+  // サイズスライダー
+  szSlider.addEventListener('input', function(){
+    szVal.textContent = szSlider.value;
+    var samples = document.querySelectorAll('.row-sample');
+    for (var i = 0; i < samples.length; i++) {
+      samples[i].style.fontSize = szSlider.value + 'px';
+    }
+  });
+
+  // カテゴリタブ切り替え
+  var tabs = document.querySelectorAll('.tab-btn');
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      currentCat = t.getAttribute('data-cat');
+      renderList();
+    });
+  });
+
+  renderList();
+})();
+</script>
+</body>
+</html>

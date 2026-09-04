@@ -1,0 +1,33 @@
+{
+  "name": "yume-kit",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Unified yume-kit for AI Self-Driving Development",
+  "dependencies": {
+    "playwright-core": "^1.55.0",
+    "pngjs": "^7.0.0"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "scripts": {
+    "test": "node tools/ycheck/smoke.mjs && node tools/yumap/smoke.mjs && node tools/presence/smoke.mjs && node tools/scan/smoke.mjs && node tools/kantoku/smoke.mjs && node tools/present/smoke.mjs && node tools/ctxlog/smoke.mjs && node tools/image-compose/smoke.mjs && node tools/layout/smoke.mjs && node tools/fal-h3/smoke.mjs && node tools/read_prompts/smoke.mjs"
+  },
+  "pi": {
+    "bin": {
+      "ycheck": "./tools/ycheck/ycheck.mjs",
+      "yumap": "./tools/yumap/yumap.mjs",
+      "presence": "./tools/presence/presence.js",
+      "scan": "./tools/scan/scan.js",
+      "kantoku": "./tools/kantoku/bin/kantoku.js",
+      "present": "./tools/present/present.mjs",
+      "ctxlog": "./tools/ctxlog/index.js",
+      "image-compose": "./tools/image-compose/cli.mjs",
+      "layout": "./tools/layout/cli.js",
+      "fal-h3": "./tools/fal-h3/h3.mjs",
+      "read-prompts": "./tools/read_prompts/read_prompts.mjs"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "yume-min",
+  "version": "0.2.0",
+  "description": "yume-min — ブロック履歴・版管理・永続化ライブラリ（append-only 版管理）",
+  "type": "module",
+  "main": "core.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "yume",
+    "block-history",
+    "append-only",
+    "versioning",
+    "ai-first"
+  ],
+  "license": "MIT"
+}

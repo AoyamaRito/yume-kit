@@ -1,0 +1,28 @@
+/* SRD A3 document system — local tokens
+ * Source: SRD/SRD_基本ルール_A3.html
+ */
+:root {
+  --sp-5: 5px;
+  --sp-8: 8px;
+  --sp-13: 13px;
+  --sp-21: 21px;
+  --sp-34: 34px;
+  --sp-55: 55px;
+
+  --fs-8: 8px;
+  --fs-13: 13px;
+  --fs-21: 21px;
+  --fs-34: 34px;
+  --fs-55: 55px;
+
+  --primary: #333333;
+  --secondary: #7f8c8d;
+  --accent: #900c3f;
+  --purple: #5b2c6f;
+  --gold: #c5a059;
+  --bg-color: #faf9f6;
+  --text-main: #444444;
+  --text-light: #7f8c8d;
+  --border-light: #bdc3c7;
+  --border-dashed: #bdc3c7;
+}

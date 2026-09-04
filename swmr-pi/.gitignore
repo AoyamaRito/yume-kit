@@ -1,0 +1,5 @@
+# @why: swmr-pi の git 管理用除外ルール
+node_modules/
+build/
+target/
+.env

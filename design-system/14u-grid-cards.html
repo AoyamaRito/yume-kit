@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>14u Grid — 1080×1920 Reference</title>
+  <style>
+    :root {
+      --ref-w: 1080;
+      --ref-h: 1920;
+      --u: calc(1080 / 14); /* 約77.14px */
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #111;
+      color: #ddd;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.4;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      background: #1a1a1a;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    button, .btn {
+      background: #222;
+      color: #ddd;
+      border: 1px solid #444;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.1s ease;
+    }
+
+    button:hover, .btn:hover {
+      background: #333;
+      border-color: #666;
+    }
+
+    button.active {
+      background: #3a3a3a;
+      border-color: #777;
+    }
+
+    .preview-wrapper {
+      position: relative;
+      width: fit-content;
+      margin: 0 auto;
+      background: #000;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+
+    .scale-label {
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .board {
+      width: 1080px;
+      height: 1920px;
+      background: #0a0a0a;
+      display: grid;
+      grid-template-columns: repeat(14, 1fr);
+      grid-template-rows: repeat(14, 1fr);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px #222;
+    }
+
+    /* グリッドライン表示用オーバーレイ */
+    .board.show-grid::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      background-image:
+        linear-gradient(to right, rgba(100, 180, 255, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(100, 180, 255, 0.35) 1px, transparent 1px);
+      background-size: calc(100% / 14) calc(100% / 14);
+      background-position: 0 0;
+    }
+
+    /* 外余白ゾーンの視覚化（デバッグ時） */
+    .board.show-grid .margin-zone {
+      background: rgba(255, 200, 100, 0.08);
+      z-index: 1;
+    }
+
+    .card {
+      background: #1f1f1f;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 16px;
+      color: #eee;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      border-color: #555;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+
+    .card-header {
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .card-body {
+      font-size: 13px;
+      color: #aaa;
+      flex: 1;
+    }
+
+    .card-footer {
+      font-size: 11px;
+      color: #666;
+      margin-top: auto;
+    }
+
+    .card.span-demo {
+      background: #1a2533;
+      border-color: #3a5a88;
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      max-width: 1080px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .control-group {
+      background: #1a1a1a;
+      padding: 12px 14px;
+      border-radius: 8px;
+    }
+
+    .control-group label {
+      display: block;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .control-group input[type="number"],
+    .control-group select {
+      width: 100%;
+      background: #222;
+      color: #ddd;
+      border: 1px solid #444;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .info {
+      max-width: 1080px;
+      margin: 20px auto 0;
+      font-size: 12px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .u-value {
+      font-family: ui-monospace, monospace;
+      background: #222;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h1>14u Grid System — 1080×1920 Reference</h1>
+  <div class="meta">
+    基本: 横14分割 / 縦14分割　|　外1u = 余白専用　|　内12u = コンテンツエリア　|　1u ≈ <span class="u-value">77.14×137.14px</span> (at 1080×1920)
+  </div>
+
+  <div class="toolbar">
+    <button id="toggleGrid" class="active">グリッドライン表示 ON</button>
+    <button id="toggleMargin">外余白ゾーン表示</button>
+    <button id="clearCards">カード全削除</button>
+    <button id="resetCards">初期カードに戻す</button>
+    <span style="margin-left: auto; font-size:12px; color:#555;">カードはグリッドラインにスナップして配置されます</span>
+  </div>
+
+  <div class="preview-wrapper">
+    <div class="scale-label">Reference: 1080 × 1920 px（スケール表示）</div>
+    <div id="board" class="board show-grid">
+      <!-- 外余白ゾーン（視覚用） -->
+      <!-- 左端カラム (col 1) -->
+      <div class="margin-zone" style="grid-column: 1; grid-row: 1 / -1;"></div>
+      <!-- 右端カラム (col 14) -->
+      <div class="margin-zone" style="grid-column: 14; grid-row: 1 / -1;"></div>
+      <!-- 上端行 (row 1) - 左右の角は重なるが問題なし -->
+      <div class="margin-zone" style="grid-column: 2 / 14; grid-row: 1;"></div>
+      <!-- 下端行 (row 14) -->
+      <div class="margin-zone" style="grid-column: 2 / 14; grid-row: 14;"></div>
+
+      <!-- 初期カード（グリッドラインに沿う配置例） -->
+      <!-- トップヘッダー風：横12u（col2-13）× 縦1.5u程度（row2-3） -->
+      <div class="card" style="grid-column: 2 / 14; grid-row: 2 / 4;">
+        <div class="card-header">メインタイトル / ヘッダーエリア</div>
+        <div class="card-body">外1u余白を確保した状態で12u幅をフルに使ったカード例。グリッドラインに厳密に沿っています。</div>
+      </div>
+
+      <!-- 左側中型カード 4u × 3u -->
+      <div class="card span-demo" style="grid-column: 2 / 6; grid-row: 5 / 8;">
+        <div class="card-header">4u × 3u カード</div>
+        <div class="card-body">横4グリッド、縦3グリッド。12uコンテンツエリア内でよく使うサイズ。</div>
+        <div class="card-footer">grid-column: 2 / 6 / grid-row: 5 / 8</div>
+      </div>
+
+      <!-- 中央 6u × 2u -->
+      <div class="card" style="grid-column: 7 / 13; grid-row: 5 / 7;">
+        <div class="card-header">6u × 2u カード</div>
+        <div class="card-body">横6u（12uの半分）。よくあるワイドカード。</div>
+        <div class="card-footer">grid-column: 7 / 13 / grid-row: 5 / 7</div>
+      </div>
+
+      <!-- 右側 2u × 4u（縦長） -->
+      <div class="card span-demo" style="grid-column: 13 / 14; grid-row: 5 / 9;">
+        <div class="card-header">1u × 4u</div>
+        <div class="card-body">狭い縦長カード。サイド情報などに。</div>
+      </div>
+
+      <!-- 下段 3u × 3u など複数 -->
+      <div class="card" style="grid-column: 2 / 5; grid-row: 9 / 12;">
+        <div class="card-header">3u × 3u</div>
+        <div class="card-body">正方形寄りのカード。</div>
+      </div>
+
+      <div class="card" style="grid-column: 5 / 9; grid-row: 9 / 12;">
+        <div class="card-header">4u × 3u</div>
+        <div class="card-body">もう一つの中サイズ。</div>
+      </div>
+
+      <div class="card span-demo" style="grid-column: 9 / 14; grid-row: 9 / 13;">
+        <div class="card-header">5u × 4u 大きめ</div>
+        <div class="card-body">横5グリッド × 縦4グリッド。コンテンツ多め。</div>
+        <div class="card-footer">grid-column: 9 / 14 / grid-row: 9 / 13</div>
+      </div>
+
+      <!-- フル幅フッター寄り -->
+      <div class="card" style="grid-column: 2 / 14; grid-row: 14 / 15;">
+        <div class="card-header" style="font-size:13px;">フッター相当（最下段ギリギリ）</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <label>カード追加（横スパン）</label>
+      <div style="display:flex; gap:8px;">
+        <select id="colStart">
+          <option value="2">col 2（左端コンテンツ）</option>
+          <option value="3">col 3</option>
+          <option value="4">col 4</option>
+          <option value="5">col 5</option>
+          <option value="6">col 6</option>
+          <option value="7">col 7</option>
+        </select>
+        <select id="colSpan">
+          <option value="2">2u</option>
+          <option value="3">3u</option>
+          <option value="4" selected>4u</option>
+          <option value="5">5u</option>
+          <option value="6">6u</option>
+          <option value="8">8u</option>
+          <option value="12">12u（フル）</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>カード追加（縦スパン）</label>
+      <div style="display:flex; gap:8px;">
+        <select id="rowStart">
+          <option value="4">row 4</option>
+          <option value="5">row 5</option>
+          <option value="6" selected>row 6</option>
+          <option value="7">row 7</option>
+          <option value="8">row 8</option>
+          <option value="9">row 9</option>
+        </select>
+        <select id="rowSpan">
+          <option value="1">1u</option>
+          <option value="2" selected>2u</option>
+          <option value="3">3u</option>
+          <option value="4">4u</option>
+          <option value="5">5u</option>
+          <option value="6">6u</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>&nbsp;</label>
+      <button id="addCard" style="width:100%;">選択した位置にカードを追加</button>
+      <div style="font-size:11px; color:#555; margin-top:6px;">
+        ※ 外余白（col1 / col14 / row1 / row14）は基本的に避けてください
+      </div>
+    </div>
+  </div>
+
+  <div class="info">
+    <strong>ルール（現在の考え）</strong><br>
+    ・全体を14×14の等分割グリッドで覆う（横も縦も）<br>
+    ・外側の1グリッド分（左右上下）を余白専用ゾーンにする<br>
+    ・カードの四辺は必ずグリッドラインに沿う（grid-column / grid-row で整数スパン）<br>
+    ・コンテンツは基本的に col 2〜13 の12u領域を使う<br>
+    ・縦も同じく row 2〜13 の領域をメインに使う（1u≈137pxは大きめなので大胆なリズム向き）
+  </div>
+
+  <script>
+    const board = document.getElementById('board');
+    const toggleGridBtn = document.getElementById('toggleGrid');
+    const toggleMarginBtn = document.getElementById('toggleMargin');
+    const clearBtn = document.getElementById('clearCards');
+    const resetBtn = document.getElementById('resetCards');
+    const addCardBtn = document.getElementById('addCard');
+
+    let gridVisible = true;
+    let marginVisible = false;
+
+    function updateGridClass() {
+      board.classList.toggle('show-grid', gridVisible);
+      board.classList.toggle('show-margin', marginVisible);
+    }
+
+    toggleGridBtn.addEventListener('click', () => {
+      gridVisible = !gridVisible;
+      toggleGridBtn.classList.toggle('active', gridVisible);
+      toggleGridBtn.textContent = gridVisible ? 'グリッドライン表示 ON' : 'グリッドライン表示 OFF';
+      updateGridClass();
+    });
+
+    toggleMarginBtn.addEventListener('click', () => {
+      marginVisible = !marginVisible;
+      toggleMarginBtn.classList.toggle('active', marginVisible);
+      // margin-zone の表示切り替え（CSSで制御）
+      board.querySelectorAll('.margin-zone').forEach(el => {
+        el.style.opacity = marginVisible ? '1' : '0';
+      });
+    });
+
+    clearBtn.addEventListener('click', () => {
+      // 初期のmargin-zone以外を削除
+      board.querySelectorAll('.card').forEach(card => card.remove());
+    });
+
+    resetBtn.addEventListener('click', () => {
+      location.reload();
+    });
+
+    addCardBtn.addEventListener('click', () => {
+      const colStart = parseInt(document.getElementById('colStart').value);
+      const colSpan = parseInt(document.getElementById('colSpan').value);
+      const rowStart = parseInt(document.getElementById('rowStart').value);
+      const rowSpan = parseInt(document.getElementById('rowSpan').value);
+
+      const colEnd = colStart + colSpan;
+      const rowEnd = rowStart + rowSpan;
+
+      // 外余白チェック（警告程度）
+      if (colStart < 2 || colEnd > 14 || rowStart < 2 || rowEnd > 14) {
+        if (!confirm('外余白ゾーンにかかっていますが、追加しますか？')) return;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.gridColumn = `${colStart} / ${colEnd}`;
+      card.style.gridRow = `${rowStart} / ${rowEnd}`;
+
+      const uW = colSpan;
+      const uH = rowSpan;
+
+      card.innerHTML = `
+        <div class="card-header">${uW}u × ${uH}u カード</div>
+        <div class="card-body">grid-column: ${colStart} / ${colEnd}<br>grid-row: ${rowStart} / ${rowEnd}</div>
+        <div class="card-footer">クリックで削除</div>
+      `;
+
+      card.addEventListener('click', () => {
+        if (confirm('このカードを削除しますか？')) card.remove();
+      });
+
+      board.appendChild(card);
+    });
+
+    // 既存カードもクリックで削除可能に
+    function makeCardsRemovable() {
+      board.querySelectorAll('.card').forEach(card => {
+        if (!card.dataset.removable) {
+          card.dataset.removable = 'true';
+          card.addEventListener('click', (e) => {
+            // 追加したカードだけ削除可能にする簡易制御
+            if (card.classList.contains('span-demo') || card.style.gridColumn.includes('2 / 14')) {
+              // 初期のデモカードはダブルクリックで削除
+              if (e.detail === 2) {
+                if (confirm('このデモカードを削除しますか？')) card.remove();
+              }
+            } else {
+              if (confirm('このカードを削除しますか？')) card.remove();
+            }
+          });
+        }
+      });
+    }
+
+    // 初期化
+    updateGridClass();
+    makeCardsRemovable();
+
+    // 初期状態で外余白ゾーンは薄くしておく（トグルでオン）
+    board.querySelectorAll('.margin-zone').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transition = 'opacity 0.2s';
+    });
+
+    // キーボードヒント
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'g') {
+        toggleGridBtn.click();
+      }
+      if (e.key.toLowerCase() === 'm') {
+        toggleMarginBtn.click();
+      }
+    });
+
+    console.log('%c[14u-grid] グリッドライン表示: Gキー / 外余白: Mキー', 'color:#555');
+  </script>
+</body>
+</html>

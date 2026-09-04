@@ -1,0 +1,10 @@
+{
+  "name": "kazari-studio",
+  "version": "1.0.0",
+  "description": "単機能・直列 飾り文字工房 (Kazari Typography Studio)",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js",
+    "e2e": "node e2e.mjs"
+  }
+}

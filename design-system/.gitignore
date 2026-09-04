@@ -1,0 +1,7 @@
+# @why: design-system の git 管理用除外ルール
+#   - fonts/ を除外（93MB で Workers の 100MB リクエストボディ制限超過のため）
+node_modules/
+build/
+target/
+.env
+fonts/

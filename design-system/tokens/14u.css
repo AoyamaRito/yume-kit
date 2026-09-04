@@ -1,0 +1,37 @@
+/* 14U Grid Design System — local tokens
+ * Source: design/DESIGN_RULES.html
+ */
+:root {
+  --navy: #0A1C3A;
+  --gold: #B89F5F;
+  --orange: #E85D04;
+
+  --14u-gap: 20px;
+  --14u-box-pad-y: 22px;
+  --14u-box-pad-x: 18px;
+  --14u-cols: 14;
+
+  --font-sans: "Noto Sans JP", "Inter", system-ui, sans-serif;
+
+  --fs-big-title: 56px;
+  --fs-hook: 21px;
+  --fs-body: 13px;
+  --fs-label: 12px;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--14u-cols), 1fr);
+  gap: var(--14u-gap);
+}
+
+.content {
+  grid-column: 2 / 14;
+}
+
+.rule-box {
+  border: 2px solid var(--gold);
+  border-radius: 4px;
+  padding: var(--14u-box-pad-y) var(--14u-box-pad-x);
+  background: var(--navy);
+}

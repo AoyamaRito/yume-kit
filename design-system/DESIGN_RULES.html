@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>14U グリッド デザインシステム</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Sans+JP:wght@400;500;700&amp;display=swap');
+
+    :root {
+      --navy: #0A1C3A;
+      --gold: #B89F5F;
+      --orange: #E85D04;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', 'Inter', system-ui, sans-serif;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: repeat(14, 1fr);
+      gap: 20px;
+    }
+
+    .content {
+      grid-column: 2 / 14;
+    }
+
+    .section-header {
+      font-size: 12px;
+      letter-spacing: 3px;
+      font-weight: 700;
+      color: #E85D04;
+      text-transform: uppercase;
+    }
+
+    .rule-box {
+      border: 2px solid #B89F5F;
+      border-radius: 4px;
+      padding: 22px 18px;
+      background: #0A1C3A;
+    }
+
+    .code {
+      font-family: ui-monospace, monospace;
+      background: #111827;
+      padding: 2px 6px;
+      border-radius: 2px;
+      font-size: 0.9em;
+    }
+
+    .grid-demo {
+      background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: calc(100% / 14) calc(100% / 14);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-[#0A1C3A] text-white overflow-x-hidden">
+  <!-- Top bar: 名前・日付 左上必須 (倍の大きさ) -->
+  <div class="fixed top-0 left-0 right-0 z-50 bg-[#0A1C3A]/95 backdrop-blur border-b border-white/10 px-8 py-3 text-xs tracking-[2px] flex items-center justify-between">
+    <div class="flex items-center gap-x-6">
+      <div class="text-2xl font-semibold text-[#C9D1D9]">沖井広行　2026.06</div>
+      <div class="flex items-center gap-x-8">
+        <div>営業部署向け</div>
+        <div class="text-[#B89F5F]">暗黙知共有 × チームビルド</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pt-16 px-8">
+    <div class="max-w-[1400px] mx-auto w-full main-grid">
+      <!-- Header -->
+      <div class="content">
+        <h1 class="text-5xl font-bold tracking-tight mb-2">14U グリッド デザインシステム</h1>
+        <p class="text-xl text-[#B89F5F] mb-8">実況 凄腕営業マン プレゼン資料 用ルールブック</p>
+        <div class="section-header mb-2">概要</div>
+        <p class="max-w-prose">このシステムは横長画面向けの14等分グリッドを基盤とし、余白を重視したクリーンなデザインを実現する。HTMLを一次ソースとし、印刷でPDF化可能。</p>
+      </div>
+
+      <!-- Grid System -->
+      <div class="content mt-10">
+        <div class="section-header mb-3">グリッドシステム</div>
+        <div class="rule-box mb-4">
+          <p class="mb-2"><strong>水平・垂直ともに14等分</strong></p>
+          <p class="mb-2">1グリッド = 余白の基本単位</p>
+          <ul class="list-disc pl-5 space-y-1 text-sm">
+            <li>外側左右上下: 1u マージン (余白用)</li>
+            <li>内側: 12u コンテンツエリア</li>
+            <li>合計: 1 + 12 + 1 = 14</li>
+          </ul>
+          <p class="mt-3 text-xs opacity-75">理由: 12は2/3/4/6/12で割りやすい。14で外余白を確保しつつ柔軟。</p>
+        </div>
+
+        <div class="section-header mb-2">CSS実装</div>
+        <pre class="bg-[#111827] p-4 rounded text-sm overflow-x-auto mb-4"><code>.main-grid {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 20px;  /* 内部余白 */
+}
+.content {
+  grid-column: 2 / 14;  /* 外1uを避ける */
+}</code></pre>
+
+        <p class="text-sm">ベース参考: 1080×1920 (縦型) を横長 (16:9 など) に適応。wide-container で max-width 制御。</p>
+      </div>
+
+      <!-- 余白原則 -->
+      <div class="content mt-10">
+        <div class="section-header mb-3">余白の原則 (余白大事)</div>
+        <div class="rule-box">
+          <p>要素を近づけすぎない。ちかすぎはNG。</p>
+          <ul class="list-disc pl-5 mt-2 text-sm space-y-1">
+            <li>padding / margin / gap を u 単位で (例: 20px+ ≈ 1u+)</li>
+            <li>box 内: padding 22px 18px 以上で呼吸させる (ちかすぎ厳禁)</li>
+            <li>grid gap: 20px 以上推奨</li>
+            <li>左コンテンツ (2/10) と右囲み (10/14) の間: grid gap でしっかり確保</li>
+          </ul>
+          <p class="mt-3 text-xs opacity-75">14u の精神: 外1uマージン + 内部も余裕を持たせる。</p>
+        </div>
+      </div>
+
+      <!-- ヘッダー -->
+      <div class="content mt-10">
+        <div class="section-header mb-3">ヘッダー (左上必須)</div>
+        <div class="rule-box">
+          <p><strong>固定トップバー</strong></p>
+          <p class="mt-1">左上: 名前　日付 (text-2xl、通常の約2倍サイズ以上)</p>
+          <p class="mt-1">例: 沖井広行　2026.06</p>
+          <p class="mt-1">その後: タグ (営業部署向け / 暗黙知共有 × チームビルド)</p>
+          <p class="mt-3 text-xs opacity-75">右側に余計なメタ (PDF保存など) は置かない。クリーンに。</p>
+        </div>
+      </div>
+
+      <!-- 囲み記事 -->
+      <div class="content mt-10">
+        <div class="section-header mb-3">囲み記事</div>
+        <div class="rule-box">
+          <p>補助情報 (プレイの仕方、コンポーネントなど) をボックス化。</p>
+          <pre class="bg-[#111827] p-3 rounded mt-2 text-xs"><code>border: 2px solid #B89F5F;
+border-radius: 4px;
+padding: 22px 18px;
+background: #0A1C3A;</code></pre>
+          <p class="mt-2">内部 (余白多め):</p>
+          <ul class="text-sm">
+            <li>小ラベル「囲み記事」 (9px)</li>
+            <li>見出し (14px)</li>
+            <li>本文リスト (13px, line-height 1.6, ステップ間 margin-bottom 16px)</li>
+            <li>下部コンポーネント (10.5px, padding-top 10px)</li>
+          </ul>
+          <p class="mt-2 text-xs opacity-75">右側 (grid 10/14) に配置。左メイン (2/10) と grid gap で分離。</p>
+        </div>
+      </div>
+
+      <!-- タイポ & カラー -->
+      <div class="content mt-10">
+        <div class="section-header mb-3">タイポグラフィ &amp; カラー</div>
+        <div class="rule-box grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="font-semibold mb-1">カラー</p>
+            <ul class="space-y-0.5">
+              <li>--navy: #0A1C3A</li>
+              <li>--gold: #B89F5F</li>
+              <li>--orange: #E85D04</li>
+            </ul>
+          </div>
+          <div>
+            <p class="font-semibold mb-1">サイズ例</p>
+            <ul class="space-y-0.5">
+              <li>big-title: 56px</li>
+              <li>hook-text: 21px</li>
+              <li>本文: 12-13px (line-height 1.55+)</li>
+              <li>ヘッダー小: 9-12px</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- スライド / レイアウト -->
+      <div class="content mt-10">
+        <div class="section-header mb-3">スライド &amp; レイアウト</div>
+        <div class="rule-box">
+          <p>各スライド: min-height: 100vh; scroll-snap-align: start;</p>
+          <p class="mt-1">横長画面 (16:9 相当) 向け。wide-container (max-width: 1600px)</p>
+          <p class="mt-1">14u でコンテンツをグリッド配置。左メイン (grid-column: 2 / 10) + 右囲み (10 / 14) の典型構成。余白を意識した gap と padding を多用。</p>
+        </div>
+      </div>
+
+      <!-- クリーンさ & PDF -->
+      <div class="content mt-10">
+        <div class="section-header mb-3">クリーンさ &amp; PDF</div>
+        <div class="rule-box">
+          <p>UIにメタ情報 (「HTMLソース」「PDF保存ボタン」など) を出さない。</p>
+          <p class="mt-1">HTML を一次ソースに。ブラウザ印刷 (landscape) で PDF 化。</p>
+          <p class="mt-1">印刷用 CSS は残すが、説明テキストは最小限。</p>
+        </div>
+      </div>
+
+      <!-- チェックリスト -->
+      <div class="content mt-10">
+        <div class="section-header mb-3">実装チェックリスト (余白・一貫性)</div>
+        <div class="rule-box text-sm">
+          <ul class="list-disc pl-5 space-y-1">
+            <li>外側1uマージン確保 (content 2/14)</li>
+            <li>grid gap 20px 以上</li>
+            <li>box 内 padding 22px 18px 以上で呼吸 (ちかすぎ厳禁)</li>
+            <li>左メイン (2/10) と右囲み (10/14) の間隔を grid gap でしっかり</li>
+            <li>ヘッダー左上 名前日付 text-2xl 以上</li>
+            <li>遊び方など本文 13px+、line-height 1.6 以上</li>
+            <li>要素間 margin-bottom 十分 (10px+)</li>
+            <li>全体的に余白を意識して「ちかすぎ」チェック</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 参照 -->
+      <div class="content mt-10 pb-12">
+        <div class="section-header mb-3">参照ファイル</div>
+        <ul class="text-sm space-y-1">
+          <li><a href="14u-fullscreen-grid.html" class="underline">14u-fullscreen-grid.html</a> — 純粋グリッドライン表示</li>
+          <li><a href="14u-grid-cards.html" class="underline">14u-grid-cards.html</a> — カード配置デモ</li>
+          <li><a href="実況凄腕営業マン-プレゼン.html" class="underline">実況凄腕営業マン-プレゼン.html</a> — 本資料 (適用例)</li>
+        </ul>
+        <p class="mt-4 text-xs opacity-60">このドキュメント自体が 14u グリッドとルールを体現。</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Optional: grid toggle like the main presentation
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'g') {
+        document.body.classList.toggle('grid-lines');
+      }
+    });
+  </script>
+</body>
+</html>

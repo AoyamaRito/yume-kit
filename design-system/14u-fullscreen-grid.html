@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+    .grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+    /* 縦ライン (14分割) */
+    .v-lines {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.22) 1px,
+        transparent 1px
+      );
+      background-size: calc(100% / 14) 100%;
+    }
+    /* 横ライン (14分割) */
+    .h-lines {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.18) 1px,
+        transparent 1px
+      );
+      background-size: 100% calc(100% / 14);
+    }
+    /* 外側1uを少し強調したい場合の補助（任意で薄く） */
+    .outer {
+      position: absolute;
+      inset: 0;
+      background: 
+        linear-gradient(to right, rgba(245, 158, 11, 0.06) 0, rgba(245, 158, 11, 0.06) calc(100%/14), transparent calc(100%/14), transparent calc(100% - 100%/14), rgba(245, 158, 11, 0.06) calc(100% - 100%/14));
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <div class="v-lines"></div>
+    <div class="h-lines"></div>
+    <div class="outer"></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# yume-kit 公開リポジトリ用 .gitignore（新構造）
+// @why: [2026-09-06] 新 yume-kit（prompts/ + tools/ + package.json）の公開リポジトリ化。
+//       ①依存(node_modules)②フォント実体(design-system/fonts・ライセンス・重さ)③生成物(png/レポート)
+//       を除外。旧 yume-kit の公開方針（Delete What, Keep Why）を踏襲。
+// @tags: SPEC
+
+# 依存
+node_modules/
+
+# 環境・シークレット
+.DS_Store
+*.log
+.env
+*.pem
+*.key
+.pi/
+
+# フォント実体（記録のみ残す）
+design-system/fonts/*
+!design-system/fonts/README.md
+!design-system/fonts/LICENSES.md
+!design-system/fonts/catalog.json
+
+# 生成物（再生成可能）
+*.png
+*-report.json
+*-check.json
+out.html

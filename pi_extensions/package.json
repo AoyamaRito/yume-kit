@@ -1,0 +1,22 @@
+{
+  "name": "pi-extensions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "pi.dev 専用アセット（pi 拡張 API・スキル・プロンプトテンプレート）。汎用ツールは tools/ に分離。",
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ],
+    "skills": [
+      "./skills"
+    ],
+    "prompts": [
+      "./prompts"
+    ]
+  },
+  "license": "MIT"
+}
